@@ -8,3 +8,5 @@ bzl_library(
     name = "mayhemfile",
     srcs = ["mayhemfile.bzl"],
 )
+
+exports_files(["mytarget.mayhemfile"])
