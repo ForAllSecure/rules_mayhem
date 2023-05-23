@@ -4,16 +4,15 @@ Generates a Mayhemfile.
 
 ## To include
 
-You can add the following snippet (replaceme)
+You can add the following snippet:
 
 ```
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
-    name = "rules_go",
-    urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.18.5/rules_go-0.18.5.tar.gz"],
-    sha256 = "a82a352bffae6bee4e95f68a8d80a70e87f42c4741e6a448bec11998fcc82329",
+    name = "rules_mayhemfile",
+    urls = ["https://github.com/xansec/rules_mayhemfile/releases/download/0.1/rules_mayhemfile-0.1.tar.gz"],
+    sha256 = "b8a1527901774180afc798aeb28c4634bdccf19c4d98e7bdd1ce79d1fe9aaad7",
 )
-load("@rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
-go_rules_dependencies()
-go_register_toolchains()
+load("@rules_mayhemfile//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@rules_mayhemfile//mayhemfile:mayhemfile.bzl", "mayhemfile")
 ```
