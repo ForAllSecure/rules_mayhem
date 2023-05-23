@@ -1,4 +1,4 @@
-# rules_mayhemfile
+# rules_mayhem
 
 Generates a Mayhemfile.
 
@@ -9,19 +9,19 @@ You can add the following snippet:
 ```
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
-    name = "rules_mayhemfile",
-    urls = ["https://github.com/xansec/rules_mayhemfile/releases/download/0.1/rules_mayhemfile-0.1.tar.gz"],
+    name = "rules_mayhem",
+    urls = ["https://github.com/xansec/rules_mayhem/releases/download/0.1/rules_mayhem-0.1.tar.gz"],
     sha256 = "123",
 )
-load("@rules_mayhemfile//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
-load("@rules_mayhemfile//mayhemfile:mayhemfile.bzl", "mayhemfile")
+load("@rules_mayhem//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@rules_mayhem//mayhem:mayhemfile.bzl", "mayhemfile")
 ```
 # To run example
 
 Create a BUILD file:
 ```
 $ cat examples/BUILD                                                                                                                                                                  
-load("//mayhemfile:mayhemfile.bzl", "mayhemfile")
+load("//mayhem:mayhemfile.bzl", "mayhemfile")
 
 # Generates a minimal Mayhemfile
 mayhemfile(
@@ -93,3 +93,4 @@ cmds:
     ## Max test case length (in bytes) to be taken into account. Test cases over
     ## that length will be truncated. Be very careful about increasing this
     ## limit as it can severely affect your fuzzer performance.
+```
