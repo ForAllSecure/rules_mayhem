@@ -1,4 +1,4 @@
-load("//mayhemfile:mayhemfile.bzl", "mayhemfile")
+load("//mayhem:mayhem.bzl", "mayhemfile")
 
 # Generates a minimal Mayhemfile
 mayhemfile(
