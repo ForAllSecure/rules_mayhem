@@ -1,18 +1,21 @@
-load("//mayhem:mayhem.bzl", "mayhemfile")
+load("//mayhem:mayhem.bzl", "mayhem")
+load("//mayhem:mayhem_validation.bzl", "mayhem_validation_test")
 
 # Generates a minimal Mayhemfile
-mayhemfile(
+mayhem(
     name = "factor",
+    run = True,
     project = "bazel_rules",
     target = "factor",
     command = "/bin/factor",
-    image = "ubuntu:latest"
+    image = "ubuntu:latest",
 )
 
 
 # Generates a complete Mayhemfile
-mayhemfile(
+mayhem(
     name = "b2sum",
+    run = False,
     project = "bazel_rules",
     target = "b2sum",
     command = "./b2sum --status --ignore-missing @@",
@@ -43,8 +46,9 @@ mayhemfile(
 )
 
 # Generates a network target Mayhemfile
-mayhemfile(
+mayhem(
     name = "lighttpd",
+    run = False,
     version = "2.0",
     project = "bazel_rules",
     target = "lighttpd",
@@ -62,4 +66,14 @@ mayhemfile(
       "coverage_analysis"
     ],
     duration = "120"
+)
+
+filegroup(
+    name = "mayhem_validator",
+    srcs = [":mayhem_validator.sh.template"],
+)
+
+mayhem_validation_test(
+    name = "validate_factor",
+    target = ":factor",
 )

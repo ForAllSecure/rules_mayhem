@@ -1,10 +1,10 @@
-def mayhemfile(**kwargs):
-    _mayhemfile(
+def mayhem(**kwargs):
+    _mayhem(
         source_file = "{name}.mayhemfile".format(**kwargs),
         **kwargs
     )
 
-def _mayhemfile_impl(ctx):
+def _mayhem_impl(ctx):
     ctx.actions.expand_template(
         template = ctx.file._template,
         output = ctx.outputs.source_file,
@@ -36,10 +36,21 @@ def _mayhemfile_impl(ctx):
 
         },
     )
+    if ctx.attr.run:
+      dummyFile = ctx.actions.declare_file("dummy")
+      ctx.actions.run(
+        inputs = [ctx.outputs.source_file],
+        outputs = [dummyFile],
+        executable = "mayhem",
+        arguments = [".", "-f", ctx.outputs.source_file.path],
+        use_default_shell_env = True,
+        )
 
-_mayhemfile = rule(
-    implementation = _mayhemfile_impl,
+
+_mayhem = rule(
+    implementation = _mayhem_impl,
     attrs = {
+        "run": attr.bool(mandatory = True),
         "version": attr.string(mandatory = False),
         "project": attr.string(mandatory = True),
         "target": attr.string(mandatory = True),
@@ -65,7 +76,7 @@ _mayhemfile = rule(
         "memory_limit": attr.string(mandatory = False),
         "dictionary": attr.string(mandatory = False),
         "_template": attr.label(
-            default = ":mytarget.mayhemfile",
+            default = ":mayhemfile.template",
             allow_single_file = True,
         ),
         "source_file": attr.output(mandatory = True),
