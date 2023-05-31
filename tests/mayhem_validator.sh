@@ -6,7 +6,7 @@ then
     exit
 fi
 
-if mayhem --verbosity debug validate . -f %MAYHEMFILE%; then
+if mayhem --verbosity debug validate . -f $1; then
   echo "Valid"
   exit 0
 else
