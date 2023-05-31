@@ -10,8 +10,8 @@ You can add the following snippet:
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_mayhem",
-    urls = ["https://github.com/xansec/rules_mayhem/releases/download/0.1/rules_mayhem-0.1.tar.gz"],
-    sha256 = "123",
+    urls = ["https://github.com/xansec/rules_mayhem/archive/refs/tags/rules_mayhem-0.1.tar.gz"],
+    sha256 = "7ed74480f2339bec7c432c295e9d2d720d75fd7bc9a8b99c156e83b8f22079c8",
 )
 load("@rules_mayhem//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
 load("@rules_mayhem//mayhem:mayhem.bzl", "mayhem")
