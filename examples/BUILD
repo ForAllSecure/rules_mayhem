@@ -1,21 +1,23 @@
-load("//mayhem:mayhem.bzl", "mayhem")
+load("//mayhem:mayhem.bzl", "mayhem_file", "mayhem_run")
 load("//mayhem:mayhem_validation.bzl", "mayhem_validation_test")
 
 # Generates a minimal Mayhemfile
-mayhem(
+mayhem_file(
     name = "factor",
-    run = True,
     project = "bazel_rules",
     target = "factor",
     command = "/bin/factor",
     image = "ubuntu:latest",
 )
 
+mayhem_run(
+    name = "factor_run",
+    mayhemfile = ":factor",
+)
 
 # Generates a complete Mayhemfile
-mayhem(
+mayhem_file(
     name = "b2sum",
-    run = False,
     project = "bazel_rules",
     target = "b2sum",
     command = "./b2sum --status --ignore-missing @@",
@@ -46,9 +48,8 @@ mayhem(
 )
 
 # Generates a network target Mayhemfile
-mayhem(
+mayhem_file(
     name = "lighttpd",
-    run = False,
     version = "2.0",
     project = "bazel_rules",
     target = "lighttpd",
