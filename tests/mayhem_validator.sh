@@ -6,9 +6,6 @@ then
     exit
 fi
 
-echo $(pwd)
-echo $(readlink -f $1)
-
 if mayhem --verbosity debug validate . -f $1; then
   echo "Valid"
   exit 0

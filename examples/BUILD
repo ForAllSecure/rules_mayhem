@@ -1,23 +1,24 @@
-load("//mayhemfile:mayhemfile.bzl", "mayhemfile")
+load("//mayhem:mayhem.bzl", "mayhem")
 
 # Generates a minimal Mayhemfile
-mayhemfile(
+mayhem(
     name = "factor",
-    project = "bazel_rules",
+    run = True,
+    project = "bazel-rules",
     target = "factor",
     command = "/bin/factor",
-    image = "ubuntu:latest"
+    image = "photon:latest",
 )
 
-
 # Generates a complete Mayhemfile
-mayhemfile(
-    name = "b2sum",
-    project = "bazel_rules",
-    target = "b2sum",
-    command = "./b2sum --status --ignore-missing @@",
-    second_command = "./uninst/b2sum --status --ignore-missing @@", # just a duplicate in this example; in real life, you want to provide both an instrumented and uninstrumented target to take advantage of SE
-    image = "ubuntu:latest",
+mayhem(
+    name = "base64",
+    run = False,
+    project = "bazel-rules",
+    target = "base64",
+    command = "./base64 @@",
+    second_command = "./base64 -d @@", # just a duplicate in this example; in real life, you want to provide both an instrumented and uninstrumented target to take advantage of SE
+    image = "photon:latest",
     duration = "90",
     tasks = [
       "exploitability_factors",
@@ -43,10 +44,11 @@ mayhemfile(
 )
 
 # Generates a network target Mayhemfile
-mayhemfile(
+mayhem(
     name = "lighttpd",
+    run = False,
     version = "2.0",
-    project = "bazel_rules",
+    project = "bazel-rules",
     target = "lighttpd",
     command = "/usr/local/sbin/lighttpd -D -f /usr/local/etc/lighttpd.conf",
     image = "forallsecure/lighttpd:vulnerable",

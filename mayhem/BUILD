@@ -5,8 +5,8 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 bzl_library(
-    name = "mayhemfile",
-    srcs = ["mayhemfile.bzl"],
+    name = "mayhem",
+    srcs = ["mayhem.bzl"],
 )
 
-exports_files(["mytarget.mayhemfile"])
+exports_files(["mayhemfile.template"])
