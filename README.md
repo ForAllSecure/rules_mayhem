@@ -10,8 +10,8 @@ You can add the following snippet:
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_mayhem",
-    urls = ["https://github.com/xansec/rules_mayhem/archive/rules_mayhem-0.3.tar.gz"],
-    sha256 = "d10335582851f295ed22d8def539eb9cc09d4c8c065a2865c0e065205ad92587",
+    urls = ["https://github.com/xansec/rules_mayhem/archive/rules_mayhem-0.4.tar.gz"],
+    sha256 = "5b643bb3a8628982d13f24abb011c56d26f3b8c170d6ebaef0633889dc9d5931",
 )
 load("@rules_mayhem//mayhem:mayhem.bzl", "mayhem")
 ```
