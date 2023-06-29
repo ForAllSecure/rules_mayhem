@@ -1,0 +1,25 @@
+name: Test rules_mayhem Mayhemfiles
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+env:
+  USE_BAZEL_VERSION: ${{ github.event.schedule != '' && 'last_green' || '' }}
+
+jobs:
+  tests:
+    name: Run tests
+    runs-on: ubuntu
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build Mayhemfiles
+        run: |
+          bazel build //examples:all
+      - name: Run tests
+        run: |
+          bazel test //examples:all

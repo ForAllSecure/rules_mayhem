@@ -3,7 +3,7 @@ load("//mayhem:mayhem.bzl", "mayhem")
 # Generates a minimal Mayhemfile
 mayhem(
     name = "factor",
-    run = True,
+    run = False,
     project = "bazel-rules",
     target = "factor",
     command = "/bin/factor",
@@ -16,8 +16,8 @@ mayhem(
     run = False,
     project = "bazel-rules",
     target = "base64",
-    command = "./base64 @@",
-    second_command = "./base64 -d @@", # just a duplicate in this example; in real life, you want to provide both an instrumented and uninstrumented target to take advantage of SE
+    command = "/bin/base64 @@",
+    second_command = "/bin/base64 -d @@", # just a duplicate in this example; in real life, you want to provide both an instrumented and uninstrumented target to take advantage of SE
     image = "photon:latest",
     duration = "90",
     tasks = [
@@ -64,4 +64,25 @@ mayhem(
       "coverage_analysis"
     ],
     duration = "120"
+)
+
+sh_test(
+    name = "validate_factor",
+    srcs = ["//tests:mayhem_validator.sh"],
+    args = ["$(location :factor.mayhemfile)"],
+    data = [":factor.mayhemfile"],
+)
+
+sh_test(
+    name = "validate_base64",
+    srcs = ["//tests:mayhem_validator.sh"],
+    args = ["$(location :base64.mayhemfile)"],
+    data = [":base64.mayhemfile"],
+)
+
+sh_test(
+    name = "validate_lighttpd",
+    srcs = ["//tests:mayhem_validator.sh"],
+    args = ["$(location :lighttpd.mayhemfile)"],
+    data = [":lighttpd.mayhemfile"],
 )
