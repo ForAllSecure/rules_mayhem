@@ -9,4 +9,4 @@ bcr_test_module:
       platform: ${{ platform }}
       bazel: ${{ bazel }}
       test_targets:
-        - "//examples:all"
+        - "@rules_mayhem//examples:all"

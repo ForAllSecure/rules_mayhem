@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * 0'
   workflow_dispatch:
 env:
   USE_BAZEL_VERSION: ${{ github.event.schedule != '' && 'last_green' || '' }}
@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Get dependencies
         run: |
           sudo apt-get update && sudo apt-get install -yq \
@@ -29,4 +29,4 @@ jobs:
           bazel build //examples:all
       - name: Run tests
         run: |
-          bazel test //examples:all
+          bazel test --test_output=all //examples:all
