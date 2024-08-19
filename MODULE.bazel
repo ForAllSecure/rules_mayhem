@@ -1,5 +1,5 @@
 module(
-	name = "rules_mayhemfile",
+	name = "rules_mayhem",
 )
 
 bazel_dep(name = "bazel_skylib", version = "1.4.1")

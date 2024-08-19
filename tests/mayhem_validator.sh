@@ -22,7 +22,7 @@ then
     echo "yq installed successfully."
 fi
 
-
+# TODO: Local only validation is not yet supported; when this is supported, we'll use the commented line instead 
 # if mayhem --verbosity debug validate . -f $1; then
 if yq eval $1 > /dev/null; then
   echo "Valid"
