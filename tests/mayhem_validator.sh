@@ -17,8 +17,9 @@ fi
 if ! command -v yq &> /dev/null
 then
     echo "WARNING: yq not found. Downloading manually first."
-    curl --fail -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq
-    chmod +x /usr/bin/yq
+    curl --fail -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o yq &&
+    chmod +x yq &&
+    sudo mv yq /usr/local/bin
     echo "yq installed successfully."
 fi
 
