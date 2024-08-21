@@ -25,7 +25,6 @@ http_file(
 http_file(
     name = "mayhem_bin",
     urls = ["https://app.mayhem.security/cli/Linux/mayhem"],
-    sha256 = "d433f7251bd0b03363b768e46456ed758bb3742b558663e45bc36f52b37808cd",
     executable = True
 )
 
