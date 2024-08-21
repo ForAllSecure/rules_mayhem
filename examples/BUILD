@@ -69,20 +69,44 @@ mayhem(
 sh_test(
     name = "validate_factor",
     srcs = ["//tests:mayhem_validator.sh"],
-    args = ["$(location :factor.mayhemfile)"],
-    data = [":factor.mayhemfile"],
+    args = [
+        "$(location //:yq)",
+        "$(location //:mayhem)",
+        "$(location :factor.mayhemfile)"
+    ],
+    data = [
+        "//:yq",
+        "//:mayhem",
+        ":factor.mayhemfile"
+    ],
 )
 
 sh_test(
     name = "validate_base64",
     srcs = ["//tests:mayhem_validator.sh"],
-    args = ["$(location :base64.mayhemfile)"],
-    data = [":base64.mayhemfile"],
+    args = [
+        "$(location //:yq)",
+        "$(location //:mayhem)",
+        "$(location :base64.mayhemfile)"
+    ],
+    data = [
+        "//:yq",
+        "//:mayhem",
+        ":base64.mayhemfile"
+    ],
 )
 
 sh_test(
     name = "validate_lighttpd",
     srcs = ["//tests:mayhem_validator.sh"],
-    args = ["$(location :lighttpd.mayhemfile)"],
-    data = [":lighttpd.mayhemfile"],
+    args = [
+        "$(location //:yq)",
+        "$(location //:mayhem)",
+        "$(location :lighttpd.mayhemfile)"
+    ],
+    data = [
+        "//:yq",
+        "//:mayhem",
+        ":lighttpd.mayhemfile"
+    ],
 )

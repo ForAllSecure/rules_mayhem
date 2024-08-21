@@ -17,13 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Get dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -yq \
-            curl
-      - name: Download Mayhem
-        run: |
-          curl --fail -L https://app.mayhem.security/cli/Linux/install.sh | sh
       - name: Build Mayhemfiles
         run: |
           bazel build //examples:all

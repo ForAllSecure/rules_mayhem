@@ -10,3 +10,15 @@ filegroup(
     ],
     visibility = ["@//distro:__pkg__"],
 )
+
+sh_binary(
+    name = "yq",
+    srcs = ["@yq_bin//file"],
+    visibility = ["//visibility:public"],
+)
+
+sh_binary(
+    name = "mayhem",
+    srcs = ["@mayhem_bin//file"],
+    visibility = ["//visibility:public"],
+)

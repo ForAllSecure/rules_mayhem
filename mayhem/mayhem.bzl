@@ -53,6 +53,8 @@ def _mayhem_impl(ctx):
           ),
       ]
 
+    return []
+
 _mayhem = rule(
     implementation = _mayhem_impl,
     attrs = {
