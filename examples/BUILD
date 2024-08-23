@@ -1,83 +1,95 @@
-load("//mayhem:mayhem.bzl", "mayhem")
+load("//mayhem:mayhem.bzl", "mayhemfile", "mayhem_run", "mayhem_package")
 
 # Generates a minimal Mayhemfile
-mayhem(
-    name = "factor",
-    run = False,
+mayhemfile(
+    name = "factor_mayhemfile",
     project = "bazel-rules",
     target = "factor",
-    command = "/bin/factor",
+    cmd = "/bin/factor",
     image = "photon:latest",
 )
 
 # Generates a complete Mayhemfile
-mayhem(
-    name = "base64",
-    run = False,
+mayhemfile(
+    name = "base64_mayhemfile",
     project = "bazel-rules",
+    owner = "forallsecure-demo",
     target = "base64",
-    command = "/bin/base64 @@",
-    second_command = "/bin/base64 -d @@", # just a duplicate in this example; in real life, you want to provide both an instrumented and uninstrumented target to take advantage of SE
+    cmd = "/bin/base64 @@",
     image = "photon:latest",
     duration = "90",
-    tasks = [
-      "exploitability_factors",
-      "regression_testing",
-      "behavior_testing"
-    ],
-    testsuite = [
-      "file://testsuite" # or https://<server>/<owner>/<project_name>/<target_name>/testsuite.tar
-    ],
+    advanced_triage = "false",
     uid = "0",
     gid = "0",
     max_length = "8192",
     cwd = "/bin",
     filepath = "/tmp/customfile",
     env = {"FOO": "foo", "BAR": "bar"},
-    cmd_timeout = "3",
     memory_limit = "8192",
     sanitizer = "false",
     libfuzzer = "false",
-    afl = "false",
     honggfuzz = "false",
-    dictionary = ""
 )
 
 # Generates a network target Mayhemfile
-mayhem(
-    name = "lighttpd",
-    run = False,
-    version = "2.0",
+mayhemfile(
+    name = "lighttpd_mayhemfile",
     project = "bazel-rules",
     target = "lighttpd",
-    command = "/usr/local/sbin/lighttpd -D -f /usr/local/etc/lighttpd.conf",
+    cmd = "/usr/local/sbin/lighttpd -D -f /usr/local/etc/lighttpd.conf",
     image = "forallsecure/lighttpd:vulnerable",
-    network = [
-      "url: tcp://localhost:80",
-      "timeout: 2",
-      "client: false"
-    ],
-    tasks = [
-      "exploitability_factors",
-      "regression_testing",
-      "behavior_testing",
-      "coverage_analysis"
-    ],
+    network_url = "tcp://localhost:80",
+    network_timeout = "2",
+    network_client = "false",
     duration = "120"
 )
+
+cc_binary(
+    name = "mayhemit",
+    srcs = ["mayhemit.c"],
+)
+
+# `mayhem_package` automatically generates a Mayhemfile; a separate mayhemfile rule is not needed
+mayhem_package(
+    name = "package_mayhemit",
+    binary = ":mayhemit",
+)
+
+mayhem_run(
+    name = "run_factor",
+    target_path = ".",
+    mayhemfile = ":factor_mayhemfile",
+)
+
+mayhem_run(
+    name = "run_base64",
+    target_path = ".",
+    mayhemfile = ":base64_mayhemfile",
+)
+
+mayhem_run(
+    name = "run_lighttpd",
+    target_path = ".",
+    mayhemfile = ":lighttpd_mayhemfile",
+)
+
+mayhem_run(
+    name = "run_mayhemit",
+    image = "ubuntu:latest",
+    target_path = ":package_mayhemit"
+)
+
 
 sh_test(
     name = "validate_factor",
     srcs = ["//tests:mayhem_validator.sh"],
     args = [
         "$(location //:yq)",
-        "$(location //:mayhem)",
-        "$(location :factor.mayhemfile)"
+        "$(location :factor_mayhemfile)"
     ],
     data = [
         "//:yq",
-        "//:mayhem",
-        ":factor.mayhemfile"
+        ":factor_mayhemfile"
     ],
 )
 
@@ -86,13 +98,11 @@ sh_test(
     srcs = ["//tests:mayhem_validator.sh"],
     args = [
         "$(location //:yq)",
-        "$(location //:mayhem)",
-        "$(location :base64.mayhemfile)"
+        "$(location :base64_mayhemfile)"
     ],
     data = [
         "//:yq",
-        "//:mayhem",
-        ":base64.mayhemfile"
+        ":base64_mayhemfile"
     ],
 )
 
@@ -101,12 +111,23 @@ sh_test(
     srcs = ["//tests:mayhem_validator.sh"],
     args = [
         "$(location //:yq)",
-        "$(location //:mayhem)",
-        "$(location :lighttpd.mayhemfile)"
+        "$(location :lighttpd_mayhemfile)"
     ],
     data = [
         "//:yq",
-        "//:mayhem",
-        ":lighttpd.mayhemfile"
+        ":lighttpd_mayhemfile"
+    ],
+)
+
+sh_test(
+    name = "validate_mayhemit",
+    srcs = ["//tests:mayhem_validator.sh"],
+    args = [
+        "$(location //:yq)",
+        "$(location :package_mayhemit)"
+    ],
+    data = [
+        "//:yq",
+        ":package_mayhemit"
     ],
 )

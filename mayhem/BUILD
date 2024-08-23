@@ -8,5 +8,3 @@ bzl_library(
     name = "mayhem",
     srcs = ["mayhem.bzl"],
 )
-
-exports_files(["mayhemfile.template"])

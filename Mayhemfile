@@ -1,49 +1,45 @@
 # Mayhem by https://forallsecure.com
 # Mayhemfile: configuration file for testing your target with Mayhem
 # Format: YAML 1.1
-{VERSION}
 
 # Project name that the target belongs to
-project: {PROJECT}
+project: xansec/ubuntu
 
 # Target name (should be unique within the project)
-target: {TARGET}
+target: ubuntu-latest
 
 # Base image to run the binary in.
-image: {IMAGE}
+image: ubuntu
 
 # Turns on extra test case processing (completing a run will take longer)
-{ADV_TRIAGE}
-{DURATION}
-{TASKS}
-{TESTSUITE}
-{UID}
-{GID}
+advanced_triage: false
 
 # List of commands used to test the target
 cmds:
 
   # Command used to start the target, "@@" is the input file
   # (when "@@" is omitted Mayhem defaults to stdin inputs)
-  - cmd: {COMMAND}
-    env: {ENV}
-    {LIBFUZZER}
-    {AFL}
-    {HONGGFUZZ}
-    {SANITIZER}
-    {CWD}
-    {FILEPATH}
-  {SECOND_COMMAND}
+  - cmd: /bin/bash
+    env: {}
+    libfuzzer: true
+extensions: {}
 
+    ## Uncomment to change default dir (/) from which the target is invoked
+    #cwd: /
+
+    ## If this is a network target, uncomment the block below and remove
+    ## the @@ input file reference in the cmd (you can either test network or
+    ## file inputs, not both).
+    #network:
     ## Use "127.0.0.1" instead of "localhost" below if you want to test only
     ## for IPv4. For IPv6, use "[::1]". By leaving as "localhost", Mayhem will
     ## attempt to autodetect the one used by the target.
-    {NETWORK}
+    #  url: tcp://localhost:8080  # protocol, host and port to analyze
+    #  client: False           # target is a client-side program
+    #  timeout: 2.0               # max seconds for sending data
 
     ## Max test case length (in bytes) to be taken into account. Test cases over
     ## that length will be truncated. Be very careful about increasing this
     ## limit as it can severely affect your fuzzer performance.
-    {MAX_LENGTH}
-    {CMD_TIMEOUT}
-    {MEMORY_LIMIT}
-    {DICTIONARY}
+    # max_length: 8192
+
