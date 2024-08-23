@@ -2,3 +2,4 @@ bazel-bin
 bazel-out
 bazel-rules_mayhem
 bazel-testlogs
+pkg
