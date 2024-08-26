@@ -4,3 +4,18 @@ module(
 )
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
+
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+
+http_file(
+    name = "yq_bin",
+    urls = ["https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"],
+    sha256 = "a2c097180dd884a8d50c956ee16a9cec070f30a7947cf4ebf87d5f36213e9ed7",
+    executable = True
+)
+
+http_file(
+    name = "mayhem_bin",
+    urls = ["https://app.mayhem.security/cli/Linux/mayhem"],
+    executable = True
+)

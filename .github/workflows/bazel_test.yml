@@ -18,13 +18,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build Mayhemfiles
-        run: |
-          bazel build //examples:factor_mayhemfile
-          bazel build //examples:base64_mayhemfile
-          bazel build //examples:lighttpd_mayhemfile
-          bazel build //examples:package_mayhemit
-
       - name: Run tests
         run: |
           bazel test --test_output=all //examples:validate_factor
