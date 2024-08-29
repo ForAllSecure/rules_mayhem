@@ -205,7 +205,7 @@ def _mayhem_package_impl(ctx):
     args.add(target.path)
 
     ctx.actions.run(
-        # inputs = [target, ctx.executable._mayhem_cli],
+        inputs = [target],
         outputs = [package_out],
         executable = ctx.executable._mayhem_cli,
         progress_message = "Packaging target %s to '%s'..." % (target.short_path, package_out.path),
