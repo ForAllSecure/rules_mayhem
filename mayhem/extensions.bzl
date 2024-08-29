@@ -1,4 +1,4 @@
-load("//mayhem:repositories.bzl", "rules_mayhem_repositories")
+load("@rules_mayhem//mayhem:repositories.bzl", "rules_mayhem_repositories")
 def _rules_mayhem_dependencies_impl(_ctx):
     rules_mayhem_repositories()
 

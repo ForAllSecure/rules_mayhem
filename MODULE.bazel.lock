@@ -65,7 +65,7 @@
   "moduleExtensions": {
     "//mayhem:extensions.bzl%rules_mayhem_dependencies": {
       "general": {
-        "bzlTransitiveDigest": "+HX1aAbQlNB4o1vXm8wXER9L83uOaCdRoWQmLYH6xkM=",
+        "bzlTransitiveDigest": "CwwcNa95rSWJ4SlThbD1Lkk5xc7bm199Ei6rxVemrNs=",
         "usagesDigest": "UK/i3PEIYzNN0BOtHM9L/Ur0O3WFgYAFRN6ppdItgOE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -119,6 +119,11 @@
             "",
             "bazel_tools",
             "bazel_tools"
+          ],
+          [
+            "",
+            "rules_mayhem",
+            ""
           ]
         ]
       }
