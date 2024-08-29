@@ -109,10 +109,10 @@ def _mayhem_run_impl(ctx):
     args_list.append("-f")
 
     if ctx.file.mayhemfile:
-        mayhemfile = ctx.file.mayhemfile
+        inputs = [wrapper, ctx.file.mayhemfile, target_path]
         args_list.append(ctx.file.mayhemfile.path)
     else:
-        mayhemfile = ctx.actions.declare_file(target_path.path + "/Mayhemfile")
+        inputs = [wrapper, target_path]
         args_list.append(target_path.path + "/Mayhemfile")
 
     if ctx.attr.image:
@@ -167,7 +167,7 @@ def _mayhem_run_impl(ctx):
     )
 
     ctx.actions.run(
-        inputs = [wrapper, mayhemfile, target_path],
+        inputs = ,
         outputs = [mayhem_out],
         executable = wrapper,
         progress_message = "Starting Mayhem run from '%s'" % (target_path.path),
