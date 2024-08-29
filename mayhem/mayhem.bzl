@@ -109,8 +109,10 @@ def _mayhem_run_impl(ctx):
     args_list.append("-f")
 
     if ctx.file.mayhemfile:
+        mayhemfile = ctx.file.mayhemfile
         args_list.append(ctx.file.mayhemfile.path)
     else:
+        mayhemfile = ctx.actions.declare_file(target_path.path + "/Mayhemfile")
         args_list.append(target_path.path + "/Mayhemfile")
 
     if ctx.attr.image:
