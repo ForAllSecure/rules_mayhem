@@ -36,13 +36,13 @@ def _mayhemfile_impl(ctx):
     if ctx.attr.network_timeout:
         args.add("--network-timeout", ctx.attr.network_timeout)
     if ctx.attr.network_client == "true":
-        args.add("--network-client")
+        args.add("--network-client", ctx.attr.network_client)
     if ctx.attr.libfuzzer == "true":
-        args.add("--libfuzzer")
+        args.add("--libfuzzer", ctx.attr.libfuzzer)
     if ctx.attr.honggfuzz == "true":
-        args.add("--honggfuzz")
+        args.add("--honggfuzz", ctx.attr.honggfuzz)
     if ctx.attr.sanitizer == "true":
-        args.add("--sanitizer")
+        args.add("--sanitizer", ctx.attr.sanitizer)
     if ctx.attr.max_length:
         args.add("--max-length", ctx.attr.max_length)
     if ctx.attr.memory_limit:
