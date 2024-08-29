@@ -84,11 +84,11 @@ sh_test(
     name = "validate_factor",
     srcs = ["//tests:mayhem_validator.sh"],
     args = [
-        "$(location //:yq)",
+        "$(location //:yq_cli)",
         "$(location :factor_mayhemfile)"
     ],
     data = [
-        "//:yq",
+        "//:yq_cli",
         ":factor_mayhemfile"
     ],
 )
@@ -97,11 +97,11 @@ sh_test(
     name = "validate_base64",
     srcs = ["//tests:mayhem_validator.sh"],
     args = [
-        "$(location //:yq)",
+        "$(location //:yq_cli)",
         "$(location :base64_mayhemfile)"
     ],
     data = [
-        "//:yq",
+        "//:yq_cli",
         ":base64_mayhemfile"
     ],
 )
@@ -110,11 +110,11 @@ sh_test(
     name = "validate_lighttpd",
     srcs = ["//tests:mayhem_validator.sh"],
     args = [
-        "$(location //:yq)",
+        "$(location //:yq_cli)",
         "$(location :lighttpd_mayhemfile)"
     ],
     data = [
-        "//:yq",
+        "//:yq_cli",
         ":lighttpd_mayhemfile"
     ],
 )
@@ -123,11 +123,11 @@ sh_test(
     name = "validate_mayhemit",
     srcs = ["//tests:mayhem_validator.sh"],
     args = [
-        "$(location //:yq)",
+        "$(location //:yq_cli)",
         "$(location :package_mayhemit)"
     ],
     data = [
-        "//:yq",
+        "//:yq_cli",
         ":package_mayhemit"
     ],
 )

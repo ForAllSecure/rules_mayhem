@@ -1,61 +1,59 @@
 def _mayhemfile_impl(ctx):
     mayhemfile = ctx.actions.declare_file(ctx.label.name + ".mayhemfile")
+    mayhem_cli = ctx.executable._mayhem_cli
 
     if ctx.attr.owner:
         full_project = ctx.attr.owner + "/" + ctx.attr.project
     else:
         full_project = ctx.attr.project
 
-    command = [
-        "'%s' init -o '%s'" % (ctx.executable._mayhem_bin.path, mayhemfile.path),
-        "--project '%s'" % full_project,
-        "--target '%s'" % ctx.attr.target,
-        "--cmd '%s'" % ctx.attr.cmd,
-    ]
+    args = ctx.actions.args()
+    args.add("init")
+    args.add("-o", mayhemfile.path)
+    args.add("--project", full_project)
+    args.add("--target", ctx.attr.target)
+    args.add("--cmd", ctx.attr.cmd)    
 
     if ctx.attr.image:
-        command.append("--image '%s'" % ctx.attr.image)
+        args.add("--image", ctx.attr.image)
     if ctx.attr.duration:
-        command.append("--duration '%s'" % ctx.attr.duration)
+        args.add("--duration", ctx.attr.duration)
     if ctx.attr.uid:
-        command.append("--uid '%s'" % ctx.attr.uid)
+        args.add("--uid", ctx.attr.uid)
     if ctx.attr.gid:
-        command.append("--gid '%s'" % ctx.attr.gid)
+        args.add("--gid", ctx.attr.gid)
     if ctx.attr.advanced_triage:
-        command.append("--advanced-triage '%s'" % ctx.attr.advanced_triage)
+        args.add("--advanced-triage", ctx.attr.advanced_triage)
     if ctx.attr.cwd:
-        command.append("--cwd '%s'" % ctx.attr.cwd)
+        args.add("--cwd", ctx.attr.cwd)
     if ctx.attr.filepath:
-        command.append("--filepath '%s'" % ctx.attr.filepath)
+        args.add("--filepath", ctx.attr.filepath)
     if ctx.attr.env:
         for key, value in ctx.attr.env.items():
-            command.append("--env '%s=%s'" % (key, value))
+            args.add("--env", key + "=" + value)
     if ctx.attr.network_url:
-        command.append("--network-url '%s'" % ctx.attr.network_url)
+        args.add("--network-url", ctx.attr.network_url)
     if ctx.attr.network_timeout:
-        command.append("--network-timeout '%s'" % ctx.attr.network_timeout)
+        args.add("--network-timeout", ctx.attr.network_timeout)
     if ctx.attr.network_client == "true":
-        command.append("--network-client")
+        args.add("--network-client")
     if ctx.attr.libfuzzer == "true":
-        command.append("--libfuzzer")
+        args.add("--libfuzzer")
     if ctx.attr.honggfuzz == "true":
-        command.append("--honggfuzz")
+        args.add("--honggfuzz")
     if ctx.attr.sanitizer == "true":
-        command.append("--sanitizer")
+        args.add("--sanitizer")
     if ctx.attr.max_length:
-        command.append("--max-length '%s'" % ctx.attr.max_length)
+        args.add("--max-length", ctx.attr.max_length)
     if ctx.attr.memory_limit:
-        command.append("--memory-limit '%s'" % ctx.attr.memory_limit)
+        args.add("--memory-limit", ctx.attr.memory_limit)
 
-    # Join the command parts into a single string
-    command_str = " ".join(command)
-
-    ctx.actions.run_shell(
-        inputs = [ctx.executable._mayhem_bin],
+    ctx.actions.run(
         outputs = [mayhemfile],
+        executable = mayhem_cli,
         progress_message = "Generating Mayhemfile for %s..." % ctx.label.name,
-        command = command_str,
-        execution_requirements = {"local": "true"},
+        arguments = [args],
+        use_default_shell_env = True,
     )
 
     return [
@@ -87,38 +85,93 @@ mayhemfile = rule(
         "sanitizer": attr.string(mandatory = False),
         "max_length": attr.string(mandatory = False),
         "memory_limit": attr.string(mandatory = False),
-        "_mayhem_bin": attr.label(executable = True, cfg = "exec", default = Label("//:mayhem")),
+        "_mayhem_cli": attr.label(
+            executable = True,
+            cfg = "exec",
+            default = Label("//:mayhem_cli"),
+            allow_single_file = True,
+        ),
     },
 )
 
+
 def _mayhem_run_impl(ctx):
     target_path = ctx.file.target_path
-    mayhem_out = ctx.actions.declare_file(ctx.label.name + ".out")
+    mayhem_out = ctx.actions.declare_file(ctx.label.name + ".mayhem_out")
+    if "@platforms//host" == "windows":
+        is_windows = True
+    else:
+        is_windows = False
 
-    command = [
-        ctx.executable._mayhem_bin.path,
-        "run",
-        target_path.path,
-        "-f",
-    ]
+    args_list = []
+    args_list.append("run")
+    args_list.append(target_path.path)
+    args_list.append("-f")
 
     if ctx.file.mayhemfile:
-        command.append(ctx.file.mayhemfile.path)
+        args_list.append(ctx.file.mayhemfile.path)
     else:
-        command.append(target_path.path + "/Mayhemfile")
+        args_list.append(target_path.path + "/Mayhemfile")
 
     if ctx.attr.image:
-        command.extend(["--image", ctx.attr.image])
+        args_list.append("--image")
+        args_list.append(ctx.attr.image)
 
-    command_str = " ".join(command) + " > " + mayhem_out.path
+    if is_windows:
+        wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
+        wrapper_content = """
+        @echo off
+        setlocal
+        set MAYHEM_CLI="{mayhem_cli}"
+        set ARGS={args}
+        set OUTPUT_FILE="{output_file}"
+        %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
+        if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+        """.format(
+            mayhem_cli=ctx.executable._mayhem_cli.path,
+            args=" ".join(['"{}"'.format(arg) for arg in args_list]),
+            output_file=mayhem_out.path
+        )
+    else:
+        wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
+        wrapper_content = """
+        #!/bin/bash
+        MAYHEM_CLI="{mayhem_cli}"
+        ARGS="{args}"
+        OUTPUT_FILE="{output_file}"
+        $MAYHEM_CLI $ARGS > $OUTPUT_FILE
+        exit $?
+        """.format(
+            mayhem_cli=ctx.executable._mayhem_cli.path,
+            args=" ".join(['"{}"'.format(arg) for arg in args_list]),
+            output_file=mayhem_out.path
+        )
 
-    ctx.actions.run_shell(
-        inputs = [target_path, ctx.executable._mayhem_bin],
-        outputs = [mayhem_out],
-        progress_message = "Starting Mayhem run from '%s'" % (target_path.path),
-        command = command_str,
-        execution_requirements = {"local": "true"},
+    # Ideally, ctx.actions.run() would support capturing stdout/stderr
+    # as described in https://github.com/bazelbuild/bazel/issues/5511
+    # Or, the mayhem cli itself could support an ouptut flag
+    # An even better option would be to mark the mayhemfile rule as executable
+    # This way, it would generate a mayhemfile with "mayhem init"
+    # and run it with "mayhem run"
+    # However, bazel treats the outputfile as the executable and attempts to run it
+    # but we can't just run the Mayhemfile, we need to run "mayhem run -f Mayhemfile [opts]"
+    # There is an option --run-under=<command_prefix>, but this requires a hardcoded
+    # and external command, and doesn't rely on our toolchain.
+    # I hate bazel ;_;
+
+    ctx.actions.write(
+        output=wrapper,
+        content=wrapper_content
     )
+
+    ctx.actions.run(
+        inputs = [wrapper],
+        outputs = [mayhem_out],
+        executable = wrapper,
+        progress_message = "Starting Mayhem run from '%s'" % (target_path.path),
+        use_default_shell_env = True,
+    )
+    
 
     return [
         DefaultInfo(
@@ -133,7 +186,12 @@ mayhem_run = rule(
         "mayhemfile": attr.label(mandatory = False, allow_single_file = True),
         "image": attr.string(mandatory = False),
         "target_path": attr.label(mandatory = True, allow_single_file = True, default = "."),
-        "_mayhem_bin": attr.label(executable = True, cfg = "exec", default = Label("//:mayhem")),
+        "_mayhem_cli": attr.label(
+            executable = True,
+            cfg = "exec",
+            default = Label("//:mayhem_cli"),
+            allow_single_file = True,
+        ),
     },
 )
 
@@ -141,12 +199,18 @@ def _mayhem_package_impl(ctx):
     target = ctx.file.binary
     package_out = ctx.actions.declare_directory(target.basename + "-pkg")
 
-    ctx.actions.run_shell(
-        inputs = [target, ctx.executable._mayhem_bin],
+    args = ctx.actions.args()
+    args.add("package")
+    args.add("-o", package_out.path)
+    args.add(target.path)
+
+    ctx.actions.run(
+        # inputs = [target, ctx.executable._mayhem_cli],
         outputs = [package_out],
+        executable = ctx.executable._mayhem_cli,
         progress_message = "Packaging target %s to '%s'..." % (target.short_path, package_out.path),
-        command = "'%s' package -o '%s' '%s'" % (ctx.executable._mayhem_bin.path, package_out.path, target.path),
-        execution_requirements = {"local": "true"},
+        arguments = [args],
+        use_default_shell_env = True,
     )
 
     return [
@@ -159,10 +223,11 @@ mayhem_package = rule(
     implementation = _mayhem_package_impl,
     attrs = {
         "binary": attr.label(mandatory = True, allow_single_file = True),
-        "_mayhem_bin": attr.label(executable = True, cfg = "exec", default = Label("//:mayhem")),
+        "_mayhem_cli": attr.label(
+            executable = True,
+            cfg = "exec",
+            default = Label("//:mayhem_cli"),
+            allow_single_file = True,
+        ),
     },
 )
-
-
-
-

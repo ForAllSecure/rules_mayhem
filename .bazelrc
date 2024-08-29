@@ -4,3 +4,5 @@ common --enable_bzlmod
 # Define MAYHEM_URL - you can (and should!) change this if you have your own instance
 build --define=MAYHEM_URL=app.mayhem.security
 
+# Spawn strategy - if this is not set, bazel tries to reference files that don't exist
+build --spawn_strategy=standalone
