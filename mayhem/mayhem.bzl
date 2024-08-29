@@ -167,7 +167,7 @@ def _mayhem_run_impl(ctx):
     )
 
     ctx.actions.run(
-        inputs = ,
+        inputs = inputs,
         outputs = [mayhem_out],
         executable = wrapper,
         progress_message = "Starting Mayhem run from '%s'" % (target_path.path),
