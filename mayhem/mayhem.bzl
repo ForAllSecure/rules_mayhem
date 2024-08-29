@@ -226,7 +226,7 @@ mayhem_package = rule(
         "_mayhem_cli": attr.label(
             executable = True,
             cfg = "exec",
-            default = Label("//:mayhem_cli"),
+            default = Label("//mayhem:mayhem_cli"),
             allow_single_file = True,
         ),
     },

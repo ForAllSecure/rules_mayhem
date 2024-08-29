@@ -4,21 +4,15 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-
-# toolchain_type(
-#     name = "mayhem_toolchain",
-#     visibility = ["//visibility:public"],
-# )
-
 bzl_library(
     name = "mayhem",
     srcs = ["mayhem.bzl"],
 )
 
-# bzl_library(
-#     name = "repositories",
-#     srcs = ["repositories.bzl"],
-# )
+bzl_library(
+    name = "repositories",
+    srcs = ["repositories.bzl"],
+)
 
 alias(
     name = "mayhem_cli",
