@@ -117,6 +117,18 @@ def _mayhem_run_impl(ctx):
         args_list.append(ctx.attr.image)
 
     if is_windows:
+        # Need to copy the Mayhem CLI to have .exe extension
+        mayhem_cli_exe = ctx.actions.declare_file(ctx.executable._mayhem_cli.path + ".exe")
+
+        ctx.actions.symlink(
+            output = mayhem_cli_exe,
+            target_file = ctx.executable._mayhem_cli,
+            # target_path = ctx.executable._mayhem_cli.path,
+            is_executable = True,
+        )
+
+        inputs.append(mayhem_cli_exe)
+
         wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
         wrapper_content = """
         @echo off
@@ -127,7 +139,7 @@ def _mayhem_run_impl(ctx):
         %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
         if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
         """.format(
-            mayhem_cli=ctx.executable._mayhem_cli.path.replace("/", "\\"),
+            mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             args=" ".join(['{}'.format(arg.replace("/", "\\")) for arg in args_list]),
             output_file=mayhem_out.path.replace("/", "\\"),
         )
