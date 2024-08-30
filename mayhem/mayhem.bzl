@@ -1,5 +1,3 @@
-load("@aspect_bazel_lib//lib:platform_utils.bzl", "platform_utils")
-
 def _mayhemfile_impl(ctx):
     mayhemfile = ctx.actions.declare_file(ctx.label.name + ".mayhemfile")
     mayhem_cli = ctx.executable._mayhem_cli
@@ -100,7 +98,7 @@ mayhemfile = rule(
 def _mayhem_run_impl(ctx):
     target_path = ctx.file.target_path
     mayhem_out = ctx.actions.declare_file(ctx.label.name + ".mayhem_out")
-    is_windows = platform_utils.host_platform_is_linux()
+    is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
     args_list = []
     args_list.append("run")
@@ -195,9 +193,7 @@ mayhem_run = rule(
             default = Label("@rules_mayhem//mayhem:mayhem_cli"),
             allow_single_file = True,
         ),
-        "_platform": attr.label(
-            default = Label("@platforms//host"),
-        ),
+        '_windows_constraint': attr.label(default = '@platforms//os:windows'),
     },
 )
 
