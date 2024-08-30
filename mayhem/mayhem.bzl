@@ -127,9 +127,9 @@ def _mayhem_run_impl(ctx):
         %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
         if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
         """.format(
-            mayhem_cli=ctx.executable._mayhem_cli.path,
-            args=" ".join(['"{}"'.format(arg) for arg in args_list]),
-            output_file=mayhem_out.path
+            mayhem_cli=ctx.executable._mayhem_cli.path.replace("/", "\\"),
+            args=" ".join(['"{}"'.format(arg.replace("/", "\\")) for arg in args_list]),
+            output_file=mayhem_out.path.replace("/", "\\"),
         )
     else:
         wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
