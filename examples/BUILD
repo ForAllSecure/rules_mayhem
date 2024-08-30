@@ -1,4 +1,5 @@
-load("//mayhem:mayhem.bzl", "mayhemfile", "mayhem_run", "mayhem_package")
+load("@rules_mayhem//mayhem:mayhem.bzl", "mayhemfile", "mayhem_run", "mayhem_package")
+load("@aspect_bazel_lib//lib:yq.bzl", "yq")
 
 # Generates a minimal Mayhemfile
 mayhemfile(
