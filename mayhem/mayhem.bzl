@@ -136,6 +136,7 @@ def _mayhem_run_impl(ctx):
         set MAYHEM_CLI={mayhem_cli}
         set ARGS={args}
         set OUTPUT_FILE={output_file}
+        %MAYHEM_CLI% login
         %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
         if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
         """.format(
@@ -150,6 +151,7 @@ def _mayhem_run_impl(ctx):
         MAYHEM_CLI={mayhem_cli}
         ARGS={args}
         OUTPUT_FILE={output_file}
+        $MAYHEM_CLI login
         $MAYHEM_CLI $ARGS > $OUTPUT_FILE
         exit $?
         """.format(
