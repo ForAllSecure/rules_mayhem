@@ -94,7 +94,6 @@ mayhemfile = rule(
     },
 )
 
-
 def _mayhem_run_impl(ctx):
     target_path = ctx.file.target_path
     mayhem_out = ctx.actions.declare_file(ctx.label.name + ".mayhem_out")
@@ -123,7 +122,6 @@ def _mayhem_run_impl(ctx):
         ctx.actions.symlink(
             output = mayhem_cli_exe,
             target_file = ctx.executable._mayhem_cli,
-            # target_path = ctx.executable._mayhem_cli.path,
             is_executable = True,
         )
 
@@ -136,7 +134,6 @@ def _mayhem_run_impl(ctx):
         set MAYHEM_CLI={mayhem_cli}
         set ARGS={args}
         set OUTPUT_FILE={output_file}
-        %MAYHEM_CLI% login
         %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
         if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
         """.format(
@@ -151,13 +148,12 @@ def _mayhem_run_impl(ctx):
         MAYHEM_CLI={mayhem_cli}
         ARGS={args}
         OUTPUT_FILE={output_file}
-        $MAYHEM_CLI login
         $MAYHEM_CLI $ARGS > $OUTPUT_FILE
         exit $?
         """.format(
             mayhem_cli=ctx.executable._mayhem_cli.path,
             args=" ".join(['{}'.format(arg) for arg in args_list]),
-            output_file=mayhem_out.path
+            output_file=mayhem_out.path,
         )
 
     # Ideally, ctx.actions.run() would support capturing stdout/stderr
@@ -170,7 +166,6 @@ def _mayhem_run_impl(ctx):
     # but we can't just run the Mayhemfile, we need to run "mayhem run -f Mayhemfile [opts]"
     # There is an option --run-under=<command_prefix>, but this requires a hardcoded
     # and external command, and doesn't rely on our toolchain.
-    # I hate bazel ;_;
 
     ctx.actions.write(
         output=wrapper,
