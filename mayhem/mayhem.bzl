@@ -186,7 +186,7 @@ def _mayhem_run_impl(ctx):
         wrapper_content = """
         #!/bin/bash
         MAYHEM_CLI={mayhem_cli}
-        ARGS={args}
+        ARGS="{args}"
         OUTPUT_FILE={output_file}
         $MAYHEM_CLI $ARGS > $OUTPUT_FILE
         """.format(
