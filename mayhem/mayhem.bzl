@@ -178,7 +178,7 @@ def _mayhem_run_impl(ctx):
         %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
         """.format(
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
-            args=" ".join(['\'{}\''.format(arg.replace("/", "\\")) for arg in args_list]),
+            args=" ".join(['"{}"'.format(arg.replace("/", "\\")) for arg in args_list]),
             output_file=mayhem_out.path.replace("/", "\\"),
         )
     else:
@@ -191,7 +191,7 @@ def _mayhem_run_impl(ctx):
         $MAYHEM_CLI $ARGS > $OUTPUT_FILE
         """.format(
             mayhem_cli=ctx.executable._mayhem_cli.path,
-            args=" ".join(['\'{}\''.format(arg) for arg in args_list]),
+            args=" ".join(['"{}"'.format(arg) for arg in args_list]),
             output_file=mayhem_out.path,
         )
 
