@@ -191,7 +191,7 @@ INFO: 2 processes: 1 internal, 1 local.
 INFO: Build completed successfully, 2 total actions
 
 
-bazel build //examples:run_mayhemit
+bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:run_mayhemit
 INFO: Analyzed target //examples:run_mayhemit (0 packages loaded, 1 target configured).
 INFO: From Starting Mayhem run from 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg':
 git version 2.46.0 found

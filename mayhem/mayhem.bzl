@@ -94,10 +94,51 @@ mayhemfile = rule(
     },
 )
 
+def mayhem_login(ctx, mayhem_cli, is_windows):
+    """ Logs into Mayhem 
+    
+    Args:
+        ctx: The context
+        mayhem_cli: The path to the Mayhem CLI
+        is_windows: A boolean indicating if the OS is Windows
+    """
+    if is_windows:
+        output_file = ctx.actions.declare_file("~\\.config\\mayhem\\mayhem")
+    else: 
+        output_file = ctx.actions.declare_file("~/.config/mayhem/mayhem")
+
+    args = ctx.actions.args()
+    args.add("login")
+    
+    if "MAYHEM_URL" in ctx.configuration.default_shell_env:
+        mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
+        args.add(mayhem_url)
+    else:
+        fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
+
+    if "MAYHEM_TOKEN" in ctx.configuration.default_shell_env:
+        mayhem_token = ctx.configuration.default_shell_env["MAYHEM_TOKEN"]
+        args.add(mayhem_token)
+    else:
+        fail("MAYHEM_TOKEN must be set with --action_env=MAYHEM_TOKEN=<token>")
+
+    ctx.actions.run(
+        inputs = [mayhem_cli],
+        outputs = [output_file],
+        executable = mayhem_cli,
+        arguments = [args],
+        progress_message = "Logging into Mayhem...",
+        use_default_shell_env = True,
+    )
+
+    return
+
 def _mayhem_run_impl(ctx):
     target_path = ctx.file.target_path
-    mayhem_out = ctx.actions.declare_file(ctx.label.name + ".mayhem_out")
+    mayhem_out = ctx.actions.declare_file(ctx.label.name + ".out")
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
+
+    mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
 
     args_list = []
     args_list.append("run")
@@ -131,11 +172,10 @@ def _mayhem_run_impl(ctx):
         wrapper_content = """
         @echo off
         setlocal
-        set MAYHEM_CLI={mayhem_cli}
-        set ARGS={args}
-        set OUTPUT_FILE={output_file}
+        set MAYHEM_CLI="{mayhem_cli}"
+        set ARGS="{args}"
+        set OUTPUT_FILE="{output_file}"
         %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
-        if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
         """.format(
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             args=" ".join(['{}'.format(arg.replace("/", "\\")) for arg in args_list]),
@@ -145,11 +185,10 @@ def _mayhem_run_impl(ctx):
         wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
         wrapper_content = """
         #!/bin/bash
-        MAYHEM_CLI={mayhem_cli}
-        ARGS={args}
-        OUTPUT_FILE={output_file}
+        MAYHEM_CLI="{mayhem_cli}"
+        ARGS="{args}"
+        OUTPUT_FILE="{output_file}"
         $MAYHEM_CLI $ARGS > $OUTPUT_FILE
-        exit $?
         """.format(
             mayhem_cli=ctx.executable._mayhem_cli.path,
             args=" ".join(['{}'.format(arg) for arg in args_list]),
@@ -182,7 +221,6 @@ def _mayhem_run_impl(ctx):
         use_default_shell_env = True,
     )
     
-
     return [
         DefaultInfo(
             files = depset([mayhem_out]),
