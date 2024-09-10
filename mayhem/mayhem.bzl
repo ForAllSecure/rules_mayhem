@@ -212,7 +212,7 @@ def _mayhem_run_impl(ctx):
         args_list.append("-f")
         args_list.append(ctx.file.mayhemfile.path)
         inputs.append(ctx.file.mayhemfile)
-    else: # target_path.path != "."
+    elif target_path.path != ".":
         args_list.append("-f")
         args_list.append(target_path.path + "/Mayhemfile")
 
@@ -234,7 +234,7 @@ def _mayhem_run_impl(ctx):
         args_list.append(ctx.attr.target)
     if ctx.attr.cmd:
         args_list.append("--cmd")
-        args_list.append("\\\"{}\\\"".format(ctx.attr.cmd))
+        args_list.append("\"{}\"".format(ctx.attr.cmd))
     if ctx.attr.image:
         args_list.append("--image")
         args_list.append(ctx.attr.image)
