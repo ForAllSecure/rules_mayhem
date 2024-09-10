@@ -154,8 +154,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
         wait_wrapper_content = """
         @echo off
         setlocal
-        set MAYHEM_CLI={mayhem_cli}
-        for /f "tokens=*" %%i in {input_file} do %MAYHEM_CLI% wait %%i >> {output_file}
+        for /f "tokens=*" %%i in {input_file} do {mayhem_cli} wait %%i >> {output_file}
         """.format(
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             input_file=mayhem_out.path.replace("/", "\\"),
@@ -165,9 +164,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.sh")
         wait_wrapper_content = """
         #!/bin/bash
-        MAYHEM_CLI={mayhem_cli}
-        ARGS="wait $(cat {input_file})"
-        $MAYHEM_CLI $ARGS > {output_file}
+        {mayhem_cli} wait $(cat {input_file}) > {output_file}
         """.format(
             mayhem_cli=mayhem_cli.path,
             input_file=mayhem_out.path,
@@ -192,8 +189,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
     return mayhem_wait_out
 
 def _mayhem_run_impl(ctx):
-    target_path = ctx.file.target_path
-    inputs = [target_path]
+    inputs = []
     mayhem_out = ctx.actions.declare_file(ctx.label.name + ".out")
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
@@ -206,15 +202,17 @@ def _mayhem_run_impl(ctx):
 
     args_list = []
     args_list.append("run")
-    args_list.append(target_path.path)
 
     if ctx.file.mayhemfile:
+        args_list.append(".")
         args_list.append("-f")
         args_list.append(ctx.file.mayhemfile.path)
         inputs.append(ctx.file.mayhemfile)
-    elif target_path.path != ".":
+    elif ctx.file.target_path:
+        args_list.append(ctx.file.target_path.path)
         args_list.append("-f")
-        args_list.append(target_path.path + "/Mayhemfile")
+        args_list.append(ctx.file.target_path.path + "/Mayhemfile")
+        inputs.append(ctx.file.target_path)
 
     if ctx.attr.regression:
         args_list.append("--regression")
@@ -234,7 +232,7 @@ def _mayhem_run_impl(ctx):
         args_list.append(ctx.attr.target)
     if ctx.attr.cmd:
         args_list.append("--cmd")
-        args_list.append("\"{}\"".format(ctx.attr.cmd))
+        args_list.append("'{}'".format(ctx.attr.cmd))
     if ctx.attr.image:
         args_list.append("--image")
         args_list.append(ctx.attr.image)
@@ -305,10 +303,7 @@ def _mayhem_run_impl(ctx):
         wrapper_content = """
         @echo off
         setlocal
-        set MAYHEM_CLI={mayhem_cli}
-        set ARGS={args}
-        set OUTPUT_FILE={output_file}
-        %MAYHEM_CLI% %ARGS% > %OUTPUT_FILE%
+        {mayhem_cli} {args} > {output_file}
         """.format(
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             args=" ".join(['"{}"'.format(arg.replace("/", "\\")) for arg in args_list]),
@@ -319,10 +314,7 @@ def _mayhem_run_impl(ctx):
         wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
         wrapper_content = """
         #!/bin/bash
-        MAYHEM_CLI={mayhem_cli}
-        ARGS="{args}"
-        OUTPUT_FILE={output_file}
-        $MAYHEM_CLI $ARGS > $OUTPUT_FILE
+        {mayhem_cli} {args} > {output_file}
         """.format(
             mayhem_cli=ctx.executable._mayhem_cli.path,
             args=" ".join(['{}'.format(arg) for arg in args_list]),
@@ -351,7 +343,7 @@ def _mayhem_run_impl(ctx):
         inputs = inputs,
         outputs = [mayhem_out],
         executable = wrapper,
-        progress_message = "Starting Mayhem run from '%s'" % (target_path.path),
+        progress_message = "Starting Mayhem run...",
         use_default_shell_env = True,
     )
 
@@ -398,7 +390,7 @@ mayhem_run = rule(
         "max_length": attr.string(mandatory = False),
         "memory_limit": attr.string(mandatory = False),
         "insecure": attr.bool(mandatory = False),
-        "target_path": attr.label(mandatory = True, allow_single_file = True, default = "."),
+        "target_path": attr.label(mandatory = False, allow_single_file = True),
         "wait": attr.bool(mandatory = False),
         "_mayhem_cli": attr.label(
             executable = True,

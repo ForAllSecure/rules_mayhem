@@ -58,20 +58,17 @@ mayhem_package(
 
 mayhem_run(
     name = "run_factor",
-    cmd = "/bin/factor",
-    target_path = ".",
+    cmd = "/bin/factor @@",
     mayhemfile = ":factor_mayhemfile",
 )
 
 mayhem_run(
     name = "run_base64",
-    target_path = ".",
     mayhemfile = ":base64_mayhemfile",
 )
 
 mayhem_run(
     name = "run_lighttpd",
-    target_path = ".",
     duration = "60",
     regression = True, # run regression only
     wait = True, # wait for Mayhem to finish
