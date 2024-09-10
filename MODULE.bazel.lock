@@ -65,7 +65,7 @@
   "moduleExtensions": {
     "//mayhem:extensions.bzl%rules_mayhem_dependencies": {
       "general": {
-        "bzlTransitiveDigest": "CwwcNa95rSWJ4SlThbD1Lkk5xc7bm199Ei6rxVemrNs=",
+        "bzlTransitiveDigest": "MRA4rxxLkJFmqwzZbyY1ykCZcyQxSSIWb8v0LtBoBNc=",
         "usagesDigest": "dpe5nVR1GiEfgqAT7dHR0WROPmY1QUmZMXPCZoQtpVA=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -80,6 +80,17 @@
               ],
               "sha256": "a2c097180dd884a8d50c956ee16a9cec070f30a7947cf4ebf87d5f36213e9ed7",
               "executable": true
+            }
+          },
+          "bazel_skylib": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
+              "urls": [
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
+                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz"
+              ]
             }
           },
           "mayhem_cli_windows": {
@@ -111,6 +122,17 @@
               ],
               "sha256": "d509d51e6db30ebb7c9363b7ca8714224f93a456a421d7a7819ab564b868acc7",
               "executable": true
+            }
+          },
+          "platforms": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "218efe8ee736d26a3572663b374a253c012b716d8af0c07e842e82f238a0a7ee",
+              "urls": [
+                "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz",
+                "https://github.com/bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz"
+              ]
             }
           }
         },
