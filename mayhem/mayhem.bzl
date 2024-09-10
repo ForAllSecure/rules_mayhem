@@ -213,6 +213,8 @@ def _mayhem_run_impl(ctx):
         args_list.append("-f")
         args_list.append(ctx.file.target_path.path + "/Mayhemfile")
         inputs.append(ctx.file.target_path)
+    else:
+        args_list.append(".")
 
     if ctx.attr.regression:
         args_list.append("--regression")
