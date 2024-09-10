@@ -1,7 +1,7 @@
-load("@rules_mayhem//mayhem:mayhem.bzl", "mayhemfile", "mayhem_run", "mayhem_package")
+load("@rules_mayhem//mayhem:mayhem.bzl", "mayhem_init", "mayhem_run", "mayhem_package")
 
 # Generates a minimal Mayhemfile
-mayhemfile(
+mayhem_init(
     name = "factor_mayhemfile",
     project = "bazel-rules",
     target = "factor",
@@ -10,7 +10,7 @@ mayhemfile(
 )
 
 # Generates a complete Mayhemfile
-mayhemfile(
+mayhem_init(
     name = "base64_mayhemfile",
     project = "bazel-rules",
     owner = "forallsecure-demo",
@@ -32,7 +32,7 @@ mayhemfile(
 )
 
 # Generates a network target Mayhemfile
-mayhemfile(
+mayhem_init(
     name = "lighttpd_mayhemfile",
     project = "bazel-rules",
     target = "lighttpd",
@@ -47,9 +47,10 @@ mayhemfile(
 cc_binary(
     name = "mayhemit",
     srcs = ["mayhemit.c"],
+    copts = ["-g"],
 )
 
-# `mayhem_package` automatically generates a Mayhemfile; a separate mayhemfile rule is not needed
+# `mayhem_package` automatically generates a Mayhemfile; a separate mayhem_init rule is not needed
 mayhem_package(
     name = "package_mayhemit",
     binary = ":mayhemit",
@@ -70,12 +71,21 @@ mayhem_run(
 mayhem_run(
     name = "run_lighttpd",
     target_path = ".",
+    duration = "60",
+    regression = True, # run regression only
+    wait = True, # wait for Mayhem to finish
     mayhemfile = ":lighttpd_mayhemfile",
 )
 
+# Specify project, owner, and target here since we did not specify them in the mayhem_init rule
+# "all" enables coverage analysis, regression testing, static checks and behavior analysis
 mayhem_run(
     name = "run_mayhemit",
     image = "ubuntu:latest",
+    project = "bazel-rules",
+    owner = "forallsecure-demo",
+    target = "mayhemit",
+    all = True,
     target_path = ":package_mayhemit"
 )
 

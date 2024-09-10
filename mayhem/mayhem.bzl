@@ -1,4 +1,5 @@
-def _mayhemfile_impl(ctx):
+def _mayhem_init_impl(ctx):
+    print("WARNING: The 'mayhem_init' rule is deprecated and will be removed in a future release. Please use 'mayhem_run' instead.")
     mayhemfile = ctx.actions.declare_file(ctx.label.name + ".mayhemfile")
     mayhem_cli = ctx.executable._mayhem_cli
 
@@ -62,8 +63,8 @@ def _mayhemfile_impl(ctx):
         ),
     ]
 
-mayhemfile = rule(
-    implementation = _mayhemfile_impl,
+mayhem_init = rule(
+    implementation = _mayhem_init_impl,
     attrs = {
         "project": attr.string(mandatory = True),
         "target": attr.string(mandatory = True),
@@ -133,28 +134,160 @@ def mayhem_login(ctx, mayhem_cli, is_windows):
 
     return
 
+def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
+    """ Waits for Mayhem to finish
+    
+    Args:
+        ctx: The context
+        mayhem_cli: The path to the Mayhem CLI
+        mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
+        mayhem_out: The Mayhem output file
+        is_windows: A boolean indicating if the OS is Windows
+
+    Returns:
+        mayhem_wait_out: The Mayhem wait output file
+    """
+    mayhem_wait_out = ctx.actions.declare_file(ctx.label.name + ".wait.out")
+
+    if is_windows:
+        wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.bat")
+        wait_wrapper_content = """
+        @echo off
+        setlocal
+        set MAYHEM_CLI={mayhem_cli}
+        for /f "tokens=*" %%i in {input_file} do %MAYHEM_CLI% wait %%i >> {output_file}
+        """.format(
+            mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
+            input_file=mayhem_out.path.replace("/", "\\"),
+            output_file=mayhem_wait_out.path.replace("/", "\\"),
+        )
+    else:
+        wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.sh")
+        wait_wrapper_content = """
+        #!/bin/bash
+        MAYHEM_CLI={mayhem_cli}
+        ARGS="wait $(cat {input_file})"
+        $MAYHEM_CLI $ARGS > {output_file}
+        """.format(
+            mayhem_cli=mayhem_cli.path,
+            input_file=mayhem_out.path,
+            output_file=mayhem_wait_out.path,
+        )
+
+    ctx.actions.write(
+        output=wait_wrapper,
+        content=wait_wrapper_content
+    )
+
+    inputs = [mayhem_cli, mayhem_out, wait_wrapper]
+
+    ctx.actions.run(
+        inputs = inputs,
+        outputs = [mayhem_wait_out],
+        executable = wait_wrapper,
+        progress_message = "Waiting for Mayhem run to complete...",
+        use_default_shell_env = True,
+    )
+
+    return mayhem_wait_out
+
 def _mayhem_run_impl(ctx):
     target_path = ctx.file.target_path
+    inputs = [target_path]
     mayhem_out = ctx.actions.declare_file(ctx.label.name + ".out")
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
     mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
 
+    if ctx.attr.owner:
+        full_project = ctx.attr.owner + "/" + ctx.attr.project
+    else:
+        full_project = ctx.attr.project
+
     args_list = []
     args_list.append("run")
     args_list.append(target_path.path)
-    args_list.append("-f")
 
     if ctx.file.mayhemfile:
-        inputs = [ctx.file.mayhemfile, target_path]
+        args_list.append("-f")
         args_list.append(ctx.file.mayhemfile.path)
-    else:
-        inputs = [target_path]
+        inputs.append(ctx.file.mayhemfile)
+    else: # target_path.path != "."
+        args_list.append("-f")
         args_list.append(target_path.path + "/Mayhemfile")
 
+    if ctx.attr.regression:
+        args_list.append("--regression")
+    if ctx.attr.static:
+        args_list.append("--static")
+    if ctx.attr.dynamic:
+        args_list.append("--dynamic")
+    if ctx.attr.coverage:
+        args_list.append("--coverage")
+    if ctx.attr.all:
+        args_list.append("--all")
+    if ctx.attr.project:
+        args_list.append("--project")
+        args_list.append(full_project)
+    if ctx.attr.target:
+        args_list.append("--target")
+        args_list.append(ctx.attr.target)
+    if ctx.attr.cmd:
+        args_list.append("--cmd")
+        args_list.append(ctx.attr.cmd)
     if ctx.attr.image:
         args_list.append("--image")
         args_list.append(ctx.attr.image)
+    if ctx.attr.duration:
+        args_list.append("--duration")
+        args_list.append(ctx.attr.duration)
+    if ctx.attr.uid:
+        args_list.append("--uid")
+        args_list.append(ctx.attr.uid)
+    if ctx.attr.gid:
+        args_list.append("--gid")
+        args_list.append(ctx.attr.gid)
+    if ctx.attr.advanced_triage:
+        args_list.append("--advanced-triage")
+        args_list.append(ctx.attr.advanced_triage)
+    if ctx.attr.cwd:
+        args_list.append("--cwd")
+        args_list.append(ctx.attr.cwd)
+    if ctx.attr.filepath:
+        args_list.append("--filepath")
+        args_list.append(ctx.attr.filepath)
+    if ctx.attr.env:
+        for key, value in ctx.attr.env.items():
+            args_list.append("--env")
+            args_list.append(key + "=" + value)
+    if ctx.attr.network_url:
+        args_list.append("--network-url")
+        args_list.append(ctx.attr.network_url)
+    if ctx.attr.network_timeout:
+        args_list.append("--network-timeout")
+        args_list.append(ctx.attr.network_timeout)
+    if ctx.attr.network_client == "true":
+        args_list.append("--network-client")
+        args_list.append(ctx.attr.network_client)
+    if ctx.attr.libfuzzer == "true":
+        args_list.append("--libfuzzer")
+        args_list.append(ctx.attr.libfuzzer)
+    if ctx.attr.honggfuzz == "true":
+        args_list.append("--honggfuzz")
+        args_list.append(ctx.attr.honggfuzz)
+    if ctx.attr.sanitizer == "true":
+        args_list.append("--sanitizer")
+        args_list.append(ctx.attr.sanitizer)
+    if ctx.attr.max_length:
+        args_list.append("--max-length")
+        args_list.append(ctx.attr.max_length)
+    if ctx.attr.memory_limit:
+        args_list.append("--memory-limit")
+        args_list.append(ctx.attr.memory_limit)
+
+    # For self-signed instances
+    if ctx.attr.insecure:
+        args_list.append("--insecure")
 
     if is_windows:
         # Need to copy the Mayhem CLI to have .exe extension
@@ -182,6 +315,7 @@ def _mayhem_run_impl(ctx):
             output_file=mayhem_out.path.replace("/", "\\"),
         )
     else:
+        mayhem_cli_exe = None
         wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
         wrapper_content = """
         #!/bin/bash
@@ -220,10 +354,16 @@ def _mayhem_run_impl(ctx):
         progress_message = "Starting Mayhem run from '%s'" % (target_path.path),
         use_default_shell_env = True,
     )
-    
+
+    return_files = [mayhem_out]
+
+    if ctx.attr.wait:
+        mayhem_out_wait = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows)
+        return_files.append(mayhem_out_wait)    
+
     return [
         DefaultInfo(
-            files = depset([mayhem_out]),
+            files = depset(return_files),
         ),
     ]
 
@@ -232,8 +372,34 @@ mayhem_run = rule(
     implementation = _mayhem_run_impl,
     attrs = {
         "mayhemfile": attr.label(mandatory = False, allow_single_file = True),
+        "project": attr.string(mandatory = False),
+        "owner": attr.string(mandatory = False),
+        "target": attr.string(mandatory = False),
+        "regression": attr.bool(mandatory = False),
+        "static": attr.bool(mandatory = False),
+        "dynamic": attr.bool(mandatory = False),
+        "coverage": attr.bool(mandatory = False),
         "image": attr.string(mandatory = False),
+        "all": attr.bool(mandatory = False),
+        "duration": attr.string(mandatory = False),
+        "uid": attr.string(mandatory = False),
+        "gid": attr.string(mandatory = False),
+        "advanced_triage": attr.string(mandatory = False),
+        "cmd": attr.string(mandatory = False),
+        "cwd": attr.string(mandatory = False),
+        "env": attr.string_dict(mandatory = False),
+        "filepath": attr.string(mandatory = False),
+        "network_url": attr.string(mandatory = False),
+        "network_timeout": attr.string(mandatory = False),
+        "network_client": attr.string(mandatory = False),
+        "libfuzzer": attr.string(mandatory = False),
+        "honggfuzz": attr.string(mandatory = False),
+        "sanitizer": attr.string(mandatory = False),
+        "max_length": attr.string(mandatory = False),
+        "memory_limit": attr.string(mandatory = False),
+        "insecure": attr.bool(mandatory = False),
         "target_path": attr.label(mandatory = True, allow_single_file = True, default = "."),
+        "wait": attr.bool(mandatory = False),
         "_mayhem_cli": attr.label(
             executable = True,
             cfg = "exec",
