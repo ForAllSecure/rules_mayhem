@@ -214,7 +214,7 @@ def _mayhem_run_impl(ctx):
         args_list.append(ctx.file.target_path.path + "/Mayhemfile")
         inputs.append(ctx.file.target_path)
     else:
-        args_list.append(".")
+        args_list.append("--docker") # No package or Mayhemfile, default to Docker
 
     if ctx.attr.regression:
         args_list.append("--regression")
