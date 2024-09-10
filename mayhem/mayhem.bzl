@@ -154,7 +154,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
         wait_wrapper_content = """
         @echo off
         setlocal
-        for /f "tokens=*" %%i in {input_file} do {mayhem_cli} wait "%%i" >> {output_file}
+        for /f "tokens=*" %%i in {input_file} do {mayhem_cli} wait %%i >> {output_file}
         """.format(
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             input_file=mayhem_out.path.replace("/", "\\"),
@@ -164,7 +164,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.sh")
         wait_wrapper_content = """
         #!/bin/bash
-        {mayhem_cli} wait "$(cat {input_file})" > {output_file}
+        {mayhem_cli} wait $(cat {input_file}) > {output_file}
         """.format(
             mayhem_cli=mayhem_cli.path,
             input_file=mayhem_out.path,
@@ -306,8 +306,10 @@ def _mayhem_run_impl(ctx):
         wrapper_content = """
         @echo off
         setlocal
-        {mayhem_cli} {args} > {output_file}
+        echo|set /p={owner} > {output_file}
+        {mayhem_cli} {args} >> {output_file}
         """.format(
+            owner=ctx.attr.owner + "/" if ctx.attr.owner else "",
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             args=" ".join(['"{}"'.format(arg.replace("/", "\\")) for arg in args_list]),
             output_file=mayhem_out.path.replace("/", "\\"),
@@ -317,8 +319,10 @@ def _mayhem_run_impl(ctx):
         wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
         wrapper_content = """
         #!/bin/bash
-        {mayhem_cli} {args} > {output_file}
+        echo -n {owner} > {output_file}
+        {mayhem_cli} {args} >> {output_file}
         """.format(
+            owner=ctx.attr.owner + "/" if ctx.attr.owner else "",
             mayhem_cli=ctx.executable._mayhem_cli.path,
             args=" ".join(['{}'.format(arg) for arg in args_list]),
             output_file=mayhem_out.path,
