@@ -58,6 +58,7 @@ mayhem_package(
 
 mayhem_run(
     name = "run_factor",
+    cmd = "/bin/factor",
     target_path = ".",
     mayhemfile = ":factor_mayhemfile",
 )
