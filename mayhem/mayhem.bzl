@@ -195,11 +195,6 @@ def _mayhem_run_impl(ctx):
 
     mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
 
-    if ctx.attr.owner:
-        full_project = ctx.attr.owner + "/" + ctx.attr.project
-    else:
-        full_project = ctx.attr.project
-
     args_list = []
     args_list.append("run")
 
@@ -213,8 +208,11 @@ def _mayhem_run_impl(ctx):
         args_list.append("-f")
         args_list.append(ctx.file.target_path.path + "/Mayhemfile")
         inputs.append(ctx.file.target_path)
+    elif ctx.attr.image:
+        args_list.append(ctx.attr.image)
+        args_list.append("--docker")
     else:
-        args_list.append("--docker") # No package or Mayhemfile, default to Docker
+        fail("Either mayhemfile, image or target_path must be set")
 
     if ctx.attr.regression:
         args_list.append("--regression")
@@ -226,9 +224,12 @@ def _mayhem_run_impl(ctx):
         args_list.append("--coverage")
     if ctx.attr.all:
         args_list.append("--all")
+    if ctx.attr.owner:
+        args_list.append("--owner")
+        args_list.append(ctx.attr.owner)
     if ctx.attr.project:
         args_list.append("--project")
-        args_list.append(full_project)
+        args_list.append(ctx.attr.project)
     if ctx.attr.target:
         args_list.append("--target")
         args_list.append(ctx.attr.target)
