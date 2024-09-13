@@ -311,7 +311,7 @@ def _mayhem_run_impl(ctx):
         """.format(
             owner=ctx.attr.owner + "/" if ctx.attr.owner else "",
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
-            args=" ".join(['"{}"'.format(arg.replace("/", "\\")) for arg in args_list]),
+            args=" ".join(['"{}"'.format(arg) for arg in args_list]),
             output_file=mayhem_out.path.replace("/", "\\"),
         )
     else:
