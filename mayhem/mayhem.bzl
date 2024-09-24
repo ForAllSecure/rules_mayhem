@@ -134,7 +134,7 @@ def mayhem_login(ctx, mayhem_cli, is_windows):
 
     return
 
-def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
+def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, fail_on_defects):
     """ Waits for Mayhem to finish
     
     Args:
@@ -143,6 +143,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
         mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
         mayhem_out: The Mayhem output file
         is_windows: A boolean indicating if the OS is Windows
+        fail_on_defects: A boolean indicating if the build should fail on defects
 
     Returns:
         mayhem_wait_out: The Mayhem wait output file
@@ -154,20 +155,22 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows):
         wait_wrapper_content = """
         @echo off
         setlocal
-        for /f "tokens=*" %%i in ({input_file}) do {mayhem_cli} wait "%%i" >> {output_file}
+        for /f "tokens=*" %%i in ({input_file}) do {mayhem_cli} wait {fod} "%%i" >> {output_file}
         """.format(
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             input_file=mayhem_out.path.replace("/", "\\"),
+            fod="--fail-on-defects" if fail_on_defects else "",
             output_file=mayhem_wait_out.path.replace("/", "\\"),
         )
     else:
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.sh")
         wait_wrapper_content = """
         #!/bin/bash
-        {mayhem_cli} wait $(cat {input_file}) > {output_file}
+        {mayhem_cli} wait {fod} $(cat {input_file}) > {output_file}
         """.format(
             mayhem_cli=mayhem_cli.path,
             input_file=mayhem_out.path,
+            fod="--fail-on-defects" if fail_on_defects else "",
             output_file=mayhem_wait_out.path,
         )
 
@@ -357,8 +360,13 @@ def _mayhem_run_impl(ctx):
     return_files = [mayhem_out]
 
     if ctx.attr.wait:
-        mayhem_out_wait = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows)
-        return_files.append(mayhem_out_wait)    
+        if ctx.attr.dynamic or ctx.attr.all:
+            fail("The 'wait' attribute cannot be used with the 'dynamic' or 'all' attributes")
+        if not ctx.attr.duration and not ctx.attr.regression:
+            fail("The 'wait' attribute requires either the 'duration' attribute or 'regression' attribute to be set (otherwise, we will wait forever)")
+        else:
+            mayhem_out_wait = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.fail_on_defects)
+            return_files.append(mayhem_out_wait)    
 
     return [
         DefaultInfo(
@@ -399,6 +407,7 @@ mayhem_run = rule(
         "insecure": attr.bool(mandatory = False),
         "target_path": attr.label(mandatory = False, allow_single_file = True),
         "wait": attr.bool(mandatory = False),
+        "fail_on_defects": attr.bool(mandatory = False),
         "_mayhem_cli": attr.label(
             executable = True,
             cfg = "exec",
@@ -437,6 +446,51 @@ mayhem_package = rule(
     implementation = _mayhem_package_impl,
     attrs = {
         "binary": attr.label(mandatory = True, allow_single_file = True),
+        "_mayhem_cli": attr.label(
+            executable = True,
+            cfg = "exec",
+            default = Label("@rules_mayhem//mayhem:mayhem_cli"),
+            allow_single_file = True,
+        ),
+    },
+)
+
+def _mayhem_download_impl(ctx):
+    output_dir = ctx.actions.declare_directory(ctx.attr.target + "-pkg")
+    mayhem_cli = ctx.executable._mayhem_cli
+
+    args = ctx.actions.args()
+    args.add("download")
+    args.add("-o", output_dir.path)
+
+    if ctx.attr.owner:
+        args.add(ctx.attr.owner + "/" + ctx.attr.project + "/" + ctx.attr.target)
+    else:
+        args.add(ctx.attr.project + "/" + ctx.attr.target)
+
+    ctx.actions.run(
+        outputs = [output_dir],
+        executable = mayhem_cli,
+        progress_message = "Downloading Mayhem artifacts for %s..." % ctx.label.name,
+        arguments = [args],
+        use_default_shell_env = True,
+    )
+
+    return [
+        DefaultInfo(
+            files = depset([output_dir]),
+        ),
+    ]
+    
+
+
+mayhem_download = rule(
+    implementation = _mayhem_download_impl,
+    attrs = {
+        "output_dir": attr.string(mandatory = True),
+        "owner": attr.string(mandatory = False),
+        "project": attr.string(mandatory = True),
+        "target": attr.string(mandatory = True),
         "_mayhem_cli": attr.label(
             executable = True,
             cfg = "exec",

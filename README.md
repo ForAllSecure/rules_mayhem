@@ -1,6 +1,6 @@
 # rules_mayhem
 
-Generates a Mayhemfile and kicks off a Mayhem run.
+Run Mayhem from your Bazel infrastructure.
 
 ## To include
 
@@ -8,36 +8,55 @@ You can add the following snippet:
 
 ```
 ## MODULE.bazel
-bazel_dep(name = "rules_mayhem", version = "0.7.0")
+bazel_dep(name = "rules_mayhem", version = "0.7.3")
+rules_mayhem_extension = use_extension("@rules_mayhem//mayhem:extensions.bzl", "rules_mayhem_extension")
+use_repo(rules_mayhem_extension, "mayhem_cli_linux", "mayhem_cli_windows", "yq_cli_linux", "yq_cli_osx", "yq_cli_windows")
 ```
+
+```
+## WORKSPACE
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rules_mayhem",
+    strip_prefix = "rules_mayhem",
+    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.7.3/rules_mayhem-0.7.3.tar.gz"],
+    sha256 = "911a861da6e053e3e4c32505a4b4bbaa7ca3404611570be8b16cd2dd6d13e039",
+)
+
+
+load("@rules_mayhem//mayhem:repositories.bzl", "rules_mayhem_repositories")
+rules_mayhem_repositories(mayhem_url = "https://app.mayhem.security") # or your own Mayhem instance
+```
+
 > *Note: Please see the latest release notes for instructions on how to include the latest release of rules_mayhem into your environment.*
 
 ### Pre-requisites
 
-You'll need to modify your `.bazelrc` to use `--spawn-strategy=standalone`. 
+You'll need to modify your `.bazelrc` to set your Mayhem environment variables and use `--spawn-strategy=standalone`. 
 
 ```
 # Enable bzlmod
 common --enable_bzlmod
 
-# Define MAYHEM_URL - you can (and should!) change this if you have your own instance
-build --define=MAYHEM_URL=app.mayhem.security
+# Define MAYHEM_URL and MAYHEM_TOKEN - you can (and should!) change this if you have your own instance
+build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN
 
 # Spawn strategy - if this is not set, bazel tries to reference files that don't exist
 build --spawn_strategy=standalone
 ```
 
-Or, you can pass it to bazel directly, with `bazel build --spawn-strategy=standalone [...]`
+Or, you can pass it to bazel directly, with `bazel build --spawn-strategy=standalone --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN [...]`
 
 
 ## To build a Mayhemfile
 
 Create a BUILD file:
 ```                                                                                                                                                              
-load("//mayhem:mayhem.bzl", "mayhemfile", "mayhem_run", "mayhem_package")
+load("//mayhem:mayhem.bzl", "mayhem_init", "mayhem_run", "mayhem_package")
 
 # Generates a minimal Mayhemfile
-mayhemfile(
+mayhem_init(
     name = "factor_mayhemfile",
     project = "bazel-rules",
     target = "factor",
@@ -59,7 +78,7 @@ INFO: 1 process: 1 internal.
 INFO: Build completed successfully, 1 total action
 ```
 
-Should produce valid Mayhemfile:
+This should produce a valid Mayhemfile:
 ```
 $ cat bazel-out/k8-fastbuild/bin/examples/factor_mayhemfile.mayhemfile
 
@@ -123,7 +142,7 @@ mayhem_run(
 Then build:
 
 ```
-bazel build //examples:run_factor
+bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:run_factor
 INFO: Analyzed target //examples:run_factor (0 packages loaded, 0 targets configured).
 INFO: From Starting Mayhem run from 'examples':
 WARNING /home/xansec/mayhem/github/mcode/rules_mayhem/examples/testsuite is not a file or directory, skipping
@@ -210,7 +229,12 @@ INFO: Build completed successfully, 3 total actions
 
 # To Do
 
-- Customizeable Mayhem CLI download URL
-- Combine the `mayhem_run` targets into the `mayhemfile` and `mayhem_package` targets and execute with `bazel run`
-- Use output flag for `mayhem run` instead of custom wrapper script
-- Tests are currently `sh_test` only and do not run on Windows
+- [x] Customizeable Mayhem CLI download URL
+- [x] Support for packaging binaries
+- [x] `wait` parameter to `mayhem_run()`: Support waiting for Mayhem run to complete
+- [x] `fail_on_defects` parameter to `mayhem_run()`: Return exit code 1 if Mayhem run finds defects
+- [x] `mayhem_download` rule to grab testsuite and coverage info
+- [ ] Support MacOS (currently only Linux and Windows; MacOS requires binary signing and unpackaging)
+- [ ] Run the `mayhem_run` targets with `bazel run` instead of `bazel build`
+- [ ] Use output flag for `mayhem run` instead of custom wrapper script
+- [ ] Tests are currently `sh_test` only and do not run on Windows

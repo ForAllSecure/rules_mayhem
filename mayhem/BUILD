@@ -14,11 +14,37 @@ bzl_library(
     srcs = ["repositories.bzl"],
 )
 
+config_setting(
+    name = "is_linux_x64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
+    name = "is_windows_x64",
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
+    name = "is_osx_x64",
+    constraint_values = [
+        "@platforms//os:osx",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
 alias(
     name = "mayhem_cli",
     actual = select({
-        "@platforms//os:linux": "@mayhem_cli_linux//file",
-        "@platforms//os:windows": "@mayhem_cli_windows//file",
+        ":is_linux_x64": "@mayhem_cli_linux//file",
+        ":is_windows_x64": "@mayhem_cli_windows//file",
+        # ":is_osx_x64": "@mayhem_cli_osx//file",
+        "//conditions:default": "@platforms//:incompatible",
     }),
     visibility = ["//visibility:public"],
 )
@@ -26,8 +52,10 @@ alias(
 alias(
     name = "yq_cli",
     actual = select({
-        "@platforms//os:linux": "@yq_cli_linux//file",
-        "@platforms//os:windows": "@yq_cli_windows//file",
+        ":is_linux_x64": "@yq_cli_linux//file",
+        ":is_windows_x64": "@yq_cli_windows//file",
+        ":is_osx_x64": "@yq_cli_osx//file",
+        "//conditions:default": "@platforms//:incompatible",
     }),
     visibility = ["//visibility:public"],
 )
