@@ -462,6 +462,9 @@ def _mayhem_download_impl(ctx):
         output_dir = ctx.actions.declare_directory(ctx.attr.target + "-pkg")
     mayhem_cli = ctx.executable._mayhem_cli
 
+    mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
+
+
     args = ctx.actions.args()
     args.add("download")
     args.add("-o", output_dir.path)
