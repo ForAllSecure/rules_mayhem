@@ -1,4 +1,4 @@
-load("@rules_mayhem//mayhem:mayhem.bzl", "mayhem_init", "mayhem_run", "mayhem_package")
+load("@rules_mayhem//mayhem:mayhem.bzl", "mayhem_init", "mayhem_run", "mayhem_package", "mayhem_download")
 
 # Generates a minimal Mayhemfile
 mayhem_init(
@@ -64,14 +64,15 @@ mayhem_run(
 
 mayhem_run(
     name = "run_base64",
+    duration = "60",
     mayhemfile = ":base64_mayhemfile",
 )
 
 mayhem_run(
     name = "run_lighttpd",
-    duration = "60",
     regression = True, # run regression only
     wait = True, # wait for Mayhem to finish
+    fail_on_defects = True, # fail if defects are found
     mayhemfile = ":lighttpd_mayhemfile",
 )
 
@@ -80,11 +81,19 @@ mayhem_run(
 mayhem_run(
     name = "run_mayhemit",
     image = "ubuntu:latest",
-    project = "bazel-rules",
     owner = "forallsecure-demo",
+    project = "bazel-rules",
     target = "mayhemit",
     all = True,
     target_path = ":package_mayhemit"
+)
+
+mayhem_download(
+    name = "download_mayhemit",
+    owner = "forallsecure-demo",
+    project = "bazel-rules",
+    target = "mayhemit",
+    output_dir = "mayhemit_output",
 )
 
 

@@ -63,13 +63,15 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "//mayhem:extensions.bzl%rules_mayhem_dependencies": {
+    "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
-        "bzlTransitiveDigest": "MRA4rxxLkJFmqwzZbyY1ykCZcyQxSSIWb8v0LtBoBNc=",
-        "usagesDigest": "dpe5nVR1GiEfgqAT7dHR0WROPmY1QUmZMXPCZoQtpVA=",
+        "bzlTransitiveDigest": "Ua6pRK+q8a9pYdObF2J5nofGSv4YP/ho4SJj1YNlrHI=",
+        "usagesDigest": "ZNeQpqtpXozl1pY51dcVgfhrJBOMGLcQkeDoIjvBbt4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
-        "envVariables": {},
+        "envVariables": {
+          "MAYHEM_URL": "https://aptiv-cs-summit.mayhem.security"
+        },
         "generatedRepoSpecs": {
           "yq_cli_linux": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
@@ -98,7 +100,7 @@
             "ruleClassName": "http_file",
             "attributes": {
               "urls": [
-                "https://app.mayhem.security/cli/Windows/mayhem.exe"
+                "https://aptiv-cs-summit.mayhem.security/cli/Windows/mayhem.exe"
               ],
               "executable": true
             }
@@ -108,7 +110,7 @@
             "ruleClassName": "http_file",
             "attributes": {
               "urls": [
-                "https://app.mayhem.security/cli/Linux/mayhem"
+                "https://aptiv-cs-summit.mayhem.security/cli/Linux/mayhem"
               ],
               "executable": true
             }
@@ -121,6 +123,17 @@
                 "https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_windows_amd64.exe"
               ],
               "sha256": "d509d51e6db30ebb7c9363b7ca8714224f93a456a421d7a7819ab564b868acc7",
+              "executable": true
+            }
+          },
+          "yq_cli_osx": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_file",
+            "attributes": {
+              "urls": [
+                "https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_darwin_amd64"
+              ],
+              "sha256": "216ddfa03e7ba0e5aba00b236ec78324b5bfc49b610db254fe92310878baea20",
               "executable": true
             }
           },
