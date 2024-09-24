@@ -456,7 +456,10 @@ mayhem_package = rule(
 )
 
 def _mayhem_download_impl(ctx):
-    output_dir = ctx.actions.declare_directory(ctx.attr.target + "-pkg")
+    if ctx.attr.output_dir:
+        output_dir = ctx.actions.declare_directory(ctx.attr.output_dir)
+    else:
+        output_dir = ctx.actions.declare_directory(ctx.attr.target + "-pkg")
     mayhem_cli = ctx.executable._mayhem_cli
 
     args = ctx.actions.args()
@@ -487,7 +490,7 @@ def _mayhem_download_impl(ctx):
 mayhem_download = rule(
     implementation = _mayhem_download_impl,
     attrs = {
-        "output_dir": attr.string(mandatory = True),
+        "output_dir": attr.string(mandatory = False),
         "owner": attr.string(mandatory = False),
         "project": attr.string(mandatory = True),
         "target": attr.string(mandatory = True),
