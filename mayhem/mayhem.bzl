@@ -461,6 +461,7 @@ def _mayhem_download_impl(ctx):
     else:
         output_dir = ctx.actions.declare_directory(ctx.attr.target + "-pkg")
     mayhem_cli = ctx.executable._mayhem_cli
+    is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
     mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
 
@@ -503,5 +504,6 @@ mayhem_download = rule(
             default = Label("@rules_mayhem//mayhem:mayhem_cli"),
             allow_single_file = True,
         ),
+        '_windows_constraint': attr.label(default = '@platforms//os:windows'),
     },
 )
