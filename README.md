@@ -33,20 +33,17 @@ rules_mayhem_repositories(mayhem_url = "https://app.mayhem.security") # or your 
 
 ### Pre-requisites
 
-You'll need to modify your `.bazelrc` to set your Mayhem environment variables and use `--spawn-strategy=standalone`. 
+You'll need to modify your `.bazelrc` to use `--spawn-strategy=standalone`. 
 
 ```
 # Enable bzlmod
 common --enable_bzlmod
 
-# Define MAYHEM_URL and MAYHEM_TOKEN - you can (and should!) change this if you have your own instance
-build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN
-
 # Spawn strategy - if this is not set, bazel tries to reference files that don't exist
 build --spawn_strategy=standalone
 ```
 
-Or, you can pass it to bazel directly, with `bazel build --spawn-strategy=standalone --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN [...]`
+For environment variables, you can pass it to bazel directly, with `bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN [...]`
 
 
 ## To build a Mayhemfile
