@@ -360,10 +360,8 @@ def _mayhem_run_impl(ctx):
     return_files = [mayhem_out]
 
     if ctx.attr.wait:
-        if ctx.attr.dynamic or ctx.attr.all:
-            fail("The 'wait' attribute cannot be used with the 'dynamic' or 'all' attributes")
-        if not ctx.attr.duration and not ctx.attr.regression:
-            fail("The 'wait' attribute requires either the 'duration' attribute or 'regression' attribute to be set (otherwise, we will wait forever)")
+        if not ctx.attr.duration:
+            fail("The 'wait' attribute requires the 'duration' attribute to be set (otherwise, we will wait forever)")
         else:
             mayhem_out_wait = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.fail_on_defects)
             return_files.append(mayhem_out_wait)    
