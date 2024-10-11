@@ -154,7 +154,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, 
 
     junit = "--junit " + junit if junit else ""
     sarif = "--sarif " + sarif if sarif else ""
-    fod = " --fail-on-defects" if fail_on_defects else ""
+    fod = "--fail-on-defects" if fail_on_defects else ""
     opts = " ".join([junit, sarif, fod])
 
     if is_windows:
