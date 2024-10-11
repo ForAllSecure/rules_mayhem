@@ -85,7 +85,13 @@ mayhem_run(
     project = "bazel-rules",
     target = "mayhemit",
     all = True,
-    target_path = ":package_mayhemit"
+    target_path = ":package_mayhemit",
+    wait = True,
+    testsuite = "file:///$(pwd)/examples/testsuite",
+    duration = "60",
+    fail_on_defects = True,
+    junit = "mayhemit_junit.xml",
+    sarif = "mayhemit_sarif.json",
 )
 
 mayhem_download(

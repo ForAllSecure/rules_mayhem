@@ -134,7 +134,7 @@ def mayhem_login(ctx, mayhem_cli, is_windows):
 
     return
 
-def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, fail_on_defects):
+def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, sarif, fail_on_defects):
     """ Waits for Mayhem to finish
     
     Args:
@@ -143,6 +143,8 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, fail_on
         mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
         mayhem_out: The Mayhem output file
         is_windows: A boolean indicating if the OS is Windows
+        junit: The JUnit output file
+        sarif: The SARIF output file
         fail_on_defects: A boolean indicating if the build should fail on defects
 
     Returns:
@@ -150,27 +152,37 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, fail_on
     """
     mayhem_wait_out = ctx.actions.declare_file(ctx.label.name + ".wait.out")
 
+    junit = "--junit " + junit if junit else ""
+    sarif = "--sarif " + sarif if sarif else ""
+    fod = " --fail-on-defects" if fail_on_defects else ""
+    opts = " ".join([junit, sarif, fod])
+
     if is_windows:
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.bat")
         wait_wrapper_content = """
         @echo off
         setlocal
-        for /f "tokens=*" %%i in ({input_file}) do {mayhem_cli} wait {fod} "%%i" >> {output_file}
+        for /f "tokens=*" %%i in ({input_file}) do (
+            {mayhem_cli} wait {opts} "%%i" >> {output_file}
+            {mayhem_cli} show "%%i" >> {output_file}
+            {mayhem_cli} show "%%i"
+        )
         """.format(
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             input_file=mayhem_out.path.replace("/", "\\"),
-            fod="--fail-on-defects" if fail_on_defects else "",
+            opts=opts,
             output_file=mayhem_wait_out.path.replace("/", "\\"),
         )
     else:
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.sh")
         wait_wrapper_content = """
         #!/bin/bash
-        {mayhem_cli} wait {fod} $(cat {input_file}) > {output_file}
+        {mayhem_cli} wait {opts} $(cat {input_file}) > {output_file}
+        {mayhem_cli} show $(cat {input_file}) | tee -a {output_file}
         """.format(
             mayhem_cli=mayhem_cli.path,
             input_file=mayhem_out.path,
-            fod="--fail-on-defects" if fail_on_defects else "",
+            opts=opts,
             output_file=mayhem_wait_out.path,
         )
 
@@ -288,6 +300,9 @@ def _mayhem_run_impl(ctx):
     if ctx.attr.memory_limit:
         args_list.append("--memory-limit")
         args_list.append(ctx.attr.memory_limit)
+    if ctx.attr.testsuite:
+        args_list.append("--testsuite")
+        args_list.append(ctx.attr.testsuite)
 
     # For self-signed instances
     if ctx.attr.insecure:
@@ -333,7 +348,7 @@ def _mayhem_run_impl(ctx):
 
     # Ideally, ctx.actions.run() would support capturing stdout/stderr
     # as described in https://github.com/bazelbuild/bazel/issues/5511
-    # Or, the mayhem cli itself could support an ouptut flag
+    # Or, the mayhem cli itself could support an output flag
     # An even better option would be to mark the mayhemfile rule as executable
     # This way, it would generate a mayhemfile with "mayhem init"
     # and run it with "mayhem run"
@@ -363,7 +378,7 @@ def _mayhem_run_impl(ctx):
         if not ctx.attr.duration:
             fail("The 'wait' attribute requires the 'duration' attribute to be set (otherwise, we will wait forever)")
         else:
-            mayhem_out_wait = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.fail_on_defects)
+            mayhem_out_wait = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.junit, ctx.attr.sarif, ctx.attr.fail_on_defects)
             return_files.append(mayhem_out_wait)    
 
     return [
@@ -404,7 +419,11 @@ mayhem_run = rule(
         "memory_limit": attr.string(mandatory = False),
         "insecure": attr.bool(mandatory = False),
         "target_path": attr.label(mandatory = False, allow_single_file = True),
+        "testsuite": attr.string(mandatory = False),
         "wait": attr.bool(mandatory = False),
+        # The following options have no effect if "wait" is False
+        "junit": attr.string(mandatory = False),
+        "sarif": attr.string(mandatory = False),
         "fail_on_defects": attr.bool(mandatory = False),
         "_mayhem_cli": attr.label(
             executable = True,

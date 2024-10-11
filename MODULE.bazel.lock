@@ -66,11 +66,11 @@
     "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
         "bzlTransitiveDigest": "Ua6pRK+q8a9pYdObF2J5nofGSv4YP/ho4SJj1YNlrHI=",
-        "usagesDigest": "ZNeQpqtpXozl1pY51dcVgfhrJBOMGLcQkeDoIjvBbt4=",
+        "usagesDigest": "0B0OeUKOZeX3m6u1Y/eoFxf4iX/GzwCcMeqK4aQT5vk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {
-          "MAYHEM_URL": "https://aptiv-cs-summit.mayhem.security"
+          "MAYHEM_URL": "https://app.mayhem.security"
         },
         "generatedRepoSpecs": {
           "yq_cli_linux": {
@@ -100,7 +100,7 @@
             "ruleClassName": "http_file",
             "attributes": {
               "urls": [
-                "https://aptiv-cs-summit.mayhem.security/cli/Windows/mayhem.exe"
+                "https://app.mayhem.security/cli/Windows/mayhem.exe"
               ],
               "executable": true
             }
@@ -110,7 +110,7 @@
             "ruleClassName": "http_file",
             "attributes": {
               "urls": [
-                "https://aptiv-cs-summit.mayhem.security/cli/Linux/mayhem"
+                "https://app.mayhem.security/cli/Linux/mayhem"
               ],
               "executable": true
             }

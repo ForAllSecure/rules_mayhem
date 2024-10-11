@@ -8,9 +8,10 @@ You can add the following snippet:
 
 ```
 ## MODULE.bazel
-bazel_dep(name = "rules_mayhem", version = "0.7.3")
+bazel_dep(name = "rules_mayhem", version = "0.7.5")
+
 rules_mayhem_extension = use_extension("@rules_mayhem//mayhem:extensions.bzl", "rules_mayhem_extension")
-use_repo(rules_mayhem_extension, "mayhem_cli_linux", "mayhem_cli_windows", "yq_cli_linux", "yq_cli_osx", "yq_cli_windows")
+use_repo(rules_mayhem_extension, "bazel_skylib", "mayhem_cli_linux", "mayhem_cli_windows", "platforms", "yq_cli_linux", "yq_cli_osx", "yq_cli_windows")
 ```
 
 ```
@@ -20,13 +21,12 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_mayhem",
     strip_prefix = "rules_mayhem",
-    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.7.3/rules_mayhem-0.7.3.tar.gz"],
-    sha256 = "911a861da6e053e3e4c32505a4b4bbaa7ca3404611570be8b16cd2dd6d13e039",
+    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.7.5/rules_mayhem-0.7.5.tar.gz"],
+    sha256 = "756ca3dd49ba5f73dc6f07a3e233d1f8918f0995cc828472051dc719f5fd9b2b",
 )
 
-
 load("@rules_mayhem//mayhem:repositories.bzl", "rules_mayhem_repositories")
-rules_mayhem_repositories(mayhem_url = "https://app.mayhem.security") # or your own Mayhem instance
+rules_mayhem_repositories()
 ```
 
 > *Note: Please see the latest release notes for instructions on how to include the latest release of rules_mayhem into your environment.*
@@ -142,11 +142,10 @@ Then build:
 bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:run_factor
 INFO: Analyzed target //examples:run_factor (0 packages loaded, 0 targets configured).
 INFO: From Starting Mayhem run from 'examples':
-WARNING /home/xansec/mayhem/github/mcode/rules_mayhem/examples/testsuite is not a file or directory, skipping
 git version 2.46.0 found
 WARNING A default branch has not been configured for this target. Job differences will not be available in this report
-Run started: bazel-rules/factor/9
-Run URL: https://app.mayhem.security:443/xansec/bazel-rules/factor/9
+Run started: forallsecure-demo/bazel-rules/factor/9
+Run URL: https://app.mayhem.security:443/forallsecure-demo/bazel-rules/factor/9
 INFO: Found 1 target...
 Target //examples:run_factor up-to-date:
   bazel-bin/examples/run_factor.mayhem_out
@@ -214,14 +213,134 @@ git version 2.46.0 found
 WARNING A default branch has not been configured for this target. Job differences will not be available in this report
 /tmp/tmp1rd5ih1v/root.tgz   0% |                     | ETA:  --:--:--   0.0 s/B
 /tmp/tmp1rd5ih1v/root.tgz 100% |###################| Time:  0:00:00   9.3 KiB/s
-Run started: mayhemit/mayhemit/11
-Run URL: https://app.mayhem.security:443/xansec/mayhemit/mayhemit/11
+Run started: forallsecure-demo/bazel-rules/mayhemit/11
+Run URL: https://app.mayhem.security:443/forallsecure-demo/bazel-rules/mayhemit/11
 INFO: Found 1 target...
 Target //examples:run_mayhemit up-to-date:
   bazel-bin/examples/run_mayhemit.mayhem_out
 INFO: Elapsed time: 6.567s, Critical Path: 6.50s
 INFO: 3 processes: 2 internal, 1 local.
 INFO: Build completed successfully, 3 total actions
+```
+
+## Waiting and run reports
+
+You can wait on a Mayhem run by adding the `wait = True` parameter to `mayhem_run()`:
+
+```
+mayhem_run(
+    name = "run_mayhemit",
+    image = "ubuntu:latest",
+    target_path = ":package_mayhemit",
+    wait = True,
+)
+```
+
+You can tell Mayhem to return exit code 1 if defects are found. You can also specify to return either a JUnit or SARIF report:
+```
+mayhem_run(
+    name = "run_mayhemit",
+    image = "ubuntu:latest",
+    target_path = ":package_mayhemit",
+    wait = True,
+    fail_on_defects = True,
+    sarif = mayhemit.sarif,
+    junit = mayhemit.junit,
+)
+```
+
+Then build and run:
+
+```
+bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:run_mayhemit
+INFO: Analyzed target //examples:run_mayhemit (56 packages loaded, 239 targets configured).
+INFO: From Packaging target examples/mayhemit to 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg'...:
+Packaging target: examples/mayhemit
+Packaging dependency: examples/mayhemit -> bazel-out/k8-fastbuild/bin/examples/mayhemit
+Generating default configuration under: bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg/Mayhemfile
+Packaging complete.
+To upload the package do: `mayhem run bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg`.
+Before uploading, you may wish to edit the config file at 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg/Mayhemfile'.
+bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg
+INFO: From Starting Mayhem run...:
+Syncing /tmp/tmp1jw3fiwg   0% |                                | ETA:  --:--:--
+/tmp/tmp89xlpgb1/testsuite.tgz   0% |                | ETA:  --:--:--   0.0 s/B
+/tmp/tmp89xlpgb1/testsuite.tgz 100% |################| Time:  0:00:00 591.2 B/s
+Syncing /tmp/tmp1jw3fiwg 100% |################################| Time:  0:00:00
+git version 2.46.1 found
+WARNING A default branch has not been configured for this target. Job differences will not be available in this report
+/tmp/tmpz6srnoug/root.tgz   0% |                     | ETA:  --:--:--   0.0 s/B
+/tmp/tmpz6srnoug/root.tgz 100% |###################| Time:  0:00:00   6.1 KiB/s
+Run started: bazel-rules/mayhemit/9
+Run URL: https://app.mayhem.security:443/forallsecure-demo/bazel-rules/mayhemit/9
+INFO: From Waiting for Mayhem run to complete...:
+Generating JUnit XML report: mayhemit_junit.xml
+  Processing run forallsecure-demo/bazel-rules/mayhemit/9
+    Downloading testcase reports...
+    Processing 13 testcase reports...
+Writing JUnit report to mayhemit_junit.xml
+Generating SARIF JSON report: mayhemit_sarif.json
+  Processing run forallsecure-demo/bazel-rules/mayhemit/9
+    Downloading defect reports...
+    Processing 1 defect reports...
+Writing SARIF report to mayhemit_sarif.json
+ERROR Run completed, defects found
+Suggestion: Please review the generated testcase reports and correct the identified defects.
+Statistics for forallsecure-demo/bazel-rules/mayhemit/9
+    Status: coverage_analysis:running, dynamic_analysis:completed, regression_testing:completed, static_analysis:completed
+    Run started: Fri Oct 11 14:46:19 2024 -0400
+    Time elapsed: 0:01:14
+    Tests performed: 24610
+    Test reports: 13
+    Crash reports: 1
+    Defects: 1
+INFO: Found 1 target...
+Target //examples:run_mayhemit up-to-date:
+  bazel-bin/examples/run_mayhemit.out
+  bazel-bin/examples/run_mayhemit.wait.out
+INFO: Elapsed time: 87.843s, Critical Path: 87.58s
+INFO: 9 processes: 4 internal, 5 local.
+INFO: Build completed successfully, 9 total actions
+```
+
+## Downloading testsuite and coverage information
+
+`rules_mayhem` supports downloading testsuite and coverage information. In your BUILD file:
+
+```
+mayhem_download(
+    name = "download_mayhemit",
+    owner = "forallsecure-demo",
+    project = "bazel-rules",
+    target = "mayhemit",
+    output_dir = "mayhemit_output",
+)
+```
+
+Then build and run:
+
+```
+bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:download_mayhemit
+
+WARNING: Build option --action_env has changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+INFO: Analyzed target //examples:download_mayhemit (6 packages loaded, 15 targets configured).
+INFO: From Downloading Mayhem artifacts for download_mayhemit...:
+Downloading target data from run forallsecure-demo/bazel-rules/mayhemit/5...
+Downloaded: Mayhemfile.
+Downloaded: root.tgz.
+Downloaded: coverage.tgz.
+Downloading testsuite.tar:   0.0 B |#         | Elapsed Time: 0:00:00   0.0 s/B
+Downloading testsuite.tar:   8.0 KiB |     #| Elapsed Time: 0:00:01   4.4 KiB/s
+Downloading testsuite.tar:  33.0 KiB |     #| Elapsed Time: 0:00:01  17.7 KiB/s
+Extracting tests 0 of 23 |                                     | ETA:  --:--:--
+Extracting tests 23 of 23 |####################################| Time:  0:00:00
+Target downloaded at: 'bazel-out/k8-fastbuild/bin/examples/mayhemit_output'.
+INFO: Found 1 target...
+Target //examples:download_mayhemit up-to-date:
+  bazel-bin/examples/mayhemit_output
+INFO: Elapsed time: 6.615s, Critical Path: 6.43s
+INFO: 2 processes: 1 internal, 1 local.
+INFO: Build completed successfully, 2 total actions
 ```
 
 # To Do
