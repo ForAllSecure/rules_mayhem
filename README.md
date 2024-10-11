@@ -263,10 +263,6 @@ To upload the package do: `mayhem run bazel-out/k8-fastbuild/bin/examples/mayhem
 Before uploading, you may wish to edit the config file at 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg/Mayhemfile'.
 bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg
 INFO: From Starting Mayhem run...:
-Syncing /tmp/tmp1jw3fiwg   0% |                                | ETA:  --:--:--
-/tmp/tmp89xlpgb1/testsuite.tgz   0% |                | ETA:  --:--:--   0.0 s/B
-/tmp/tmp89xlpgb1/testsuite.tgz 100% |################| Time:  0:00:00 591.2 B/s
-Syncing /tmp/tmp1jw3fiwg 100% |################################| Time:  0:00:00
 git version 2.46.1 found
 WARNING A default branch has not been configured for this target. Job differences will not be available in this report
 /tmp/tmpz6srnoug/root.tgz   0% |                     | ETA:  --:--:--   0.0 s/B
