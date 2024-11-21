@@ -65,34 +65,22 @@
   "moduleExtensions": {
     "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
-        "bzlTransitiveDigest": "Ua6pRK+q8a9pYdObF2J5nofGSv4YP/ho4SJj1YNlrHI=",
-        "usagesDigest": "0B0OeUKOZeX3m6u1Y/eoFxf4iX/GzwCcMeqK4aQT5vk=",
+        "bzlTransitiveDigest": "6ScKINJUUd3/K/FcVdoqzx3rZpzqw5KyAPCon68pdFc=",
+        "usagesDigest": "vZkaJhlIV/NdpA3E88kmsx9Fbni4sG4hl6i32L51OIA=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {
-          "MAYHEM_URL": null
+          "MAYHEM_URL": "https://app.mayhem.security"
         },
         "generatedRepoSpecs": {
-          "yq_cli_linux": {
+          "mayhem_cli_linux": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_file",
             "attributes": {
               "urls": [
-                "https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"
+                "https://app.mayhem.security/cli/Linux/mayhem"
               ],
-              "sha256": "a2c097180dd884a8d50c956ee16a9cec070f30a7947cf4ebf87d5f36213e9ed7",
               "executable": true
-            }
-          },
-          "bazel_skylib": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "sha256": "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
-              "urls": [
-                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
-                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz"
-              ]
             }
           },
           "mayhem_cli_windows": {
@@ -105,13 +93,14 @@
               "executable": true
             }
           },
-          "mayhem_cli_linux": {
+          "yq_cli_linux": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_file",
             "attributes": {
               "urls": [
-                "https://app.mayhem.security/cli/Linux/mayhem"
+                "https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"
               ],
+              "sha256": "a2c097180dd884a8d50c956ee16a9cec070f30a7947cf4ebf87d5f36213e9ed7",
               "executable": true
             }
           },
@@ -135,6 +124,17 @@
               ],
               "sha256": "216ddfa03e7ba0e5aba00b236ec78324b5bfc49b610db254fe92310878baea20",
               "executable": true
+            }
+          },
+          "bazel_skylib": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
+              "urls": [
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
+                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz"
+              ]
             }
           },
           "platforms": {
@@ -166,19 +166,19 @@
     "@@apple_support~//crosstool:setup.bzl%apple_cc_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "PjIds3feoYE8SGbbIq2SFTZy3zmxeO2tQevJZNDo7iY=",
-        "usagesDigest": "aLmqbvowmHkkBPve05yyDNGN7oh7QE9kBADr3QIZTZs=",
+        "usagesDigest": "+hz7IHWN6A1oVJJWNDB6yZRG+RYhF76wAYItpAeIUIg=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "local_config_apple_cc": {
-            "bzlFile": "@@apple_support~//crosstool:setup.bzl",
-            "ruleClassName": "_apple_cc_autoconf",
-            "attributes": {}
-          },
           "local_config_apple_cc_toolchains": {
             "bzlFile": "@@apple_support~//crosstool:setup.bzl",
             "ruleClassName": "_apple_cc_autoconf_toolchains",
+            "attributes": {}
+          },
+          "local_config_apple_cc": {
+            "bzlFile": "@@apple_support~//crosstool:setup.bzl",
+            "ruleClassName": "_apple_cc_autoconf",
             "attributes": {}
           }
         },
@@ -194,7 +194,7 @@
     "@@platforms//host:extension.bzl%host_platform": {
       "general": {
         "bzlTransitiveDigest": "xelQcPZH8+tmuOHVjL9vDxMnnQNMlwj0SlvgoqBkm4U=",
-        "usagesDigest": "V1R2Y2oMxKNfx2WCWpSCaUV1WefW1o8HZGm3v1vHgY4=",
+        "usagesDigest": "hgylFkgWSg0ulUwWZzEM1aIftlUnbmw2ynWLdEfHnZc=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
