@@ -22,7 +22,7 @@ http_archive(
     name = "rules_mayhem",
     strip_prefix = "rules_mayhem",
     urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.7.7/rules_mayhem-0.7.7.tar.gz"],
-    sha256 = "e516ce7f9ccc517348d7fbea77161614c71932ba03fc2c1873beaa501aff0cfc",
+    sha256 = "d7041256bc660eb1aae51d294f4b8bed0bbd91ef252ed304d69bba7b31fe644c",
 )
 
 load("@rules_mayhem//mayhem:repositories.bzl", "rules_mayhem_repositories")
