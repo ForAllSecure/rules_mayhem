@@ -1,5 +1,6 @@
 def _mayhem_init_impl(ctx):
     print("WARNING: The 'mayhem_init' rule is deprecated and will be removed in a future release. Please use 'mayhem_run' instead.")
+    # Note: plan is to deprecate this in the future, but tests currently depend on validating output Mayhemfiles, so keeping it for now
     mayhemfile = ctx.actions.declare_file(ctx.label.name + ".mayhemfile")
     mayhem_cli = ctx.executable._mayhem_cli
 
@@ -257,6 +258,26 @@ def _mayhem_run_impl(ctx):
     if ctx.attr.duration:
         args_list.append("--duration")
         args_list.append(ctx.attr.duration)
+    if ctx.attr.warning_as_error:
+        args_list.append("--warning-as-error")
+    if ctx.attr.ci_url:
+        args_list.append("--ci-url")
+        args_list.append(ctx.attr.ci_url)
+    if ctx.attr.merge_base_branch_name:
+        args_list.append("--merge-base-branch-name")
+        args_list.append(ctx.attr.merge_base_branch_name)
+    if ctx.attr.branch_name:
+        args_list.append("--branch-name")
+        args_list.append(ctx.attr.branch_name)
+    if ctx.attr.revision:
+        args_list.append("--revision")
+        args_list.append(ctx.attr.revision)
+    if ctx.attr.parent_revision:
+        args_list.append("--parent-revision")
+        args_list.append(ctx.attr.parent_revision)
+    if ctx.attr.scm_remote:
+        args_list.append("--scm-remote")
+        args_list.append(ctx.attr.scm_remote)
     if ctx.attr.uid:
         args_list.append("--uid")
         args_list.append(ctx.attr.uid)
@@ -402,6 +423,13 @@ mayhem_run = rule(
         "image": attr.string(mandatory = False),
         "all": attr.bool(mandatory = False),
         "duration": attr.string(mandatory = False),
+        "warning_as_error": attr.bool(mandatory = False),
+        "ci_url": attr.string(mandatory = False),
+        "merge_base_branch_name": attr.string(mandatory = False),
+        "branch_name": attr.string(mandatory = False),
+        "revision": attr.string(mandatory = False),
+        "parent_revision": attr.string(mandatory = False),
+        "scm_remote": attr.string(mandatory = False),
         "uid": attr.string(mandatory = False),
         "gid": attr.string(mandatory = False),
         "advanced_triage": attr.string(mandatory = False),

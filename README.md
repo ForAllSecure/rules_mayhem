@@ -8,7 +8,7 @@ You can add the following snippet:
 
 ```
 ## MODULE.bazel
-bazel_dep(name = "rules_mayhem", version = "0.7.5")
+bazel_dep(name = "rules_mayhem", version = "0.7.7")
 
 rules_mayhem_extension = use_extension("@rules_mayhem//mayhem:extensions.bzl", "rules_mayhem_extension")
 use_repo(rules_mayhem_extension, "bazel_skylib", "mayhem_cli_linux", "mayhem_cli_windows", "platforms", "yq_cli_linux", "yq_cli_osx", "yq_cli_windows")
@@ -21,8 +21,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_mayhem",
     strip_prefix = "rules_mayhem",
-    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.7.5/rules_mayhem-0.7.5.tar.gz"],
-    sha256 = "756ca3dd49ba5f73dc6f07a3e233d1f8918f0995cc828472051dc719f5fd9b2b",
+    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.7.7/rules_mayhem-0.7.7.tar.gz"],
+    sha256 = "e516ce7f9ccc517348d7fbea77161614c71932ba03fc2c1873beaa501aff0cfc",
 )
 
 load("@rules_mayhem//mayhem:repositories.bzl", "rules_mayhem_repositories")
@@ -190,7 +190,7 @@ INFO: 7 processes: 5 internal, 2 local.
 INFO: Build completed successfully, 7 total actions
 
 
-bazel build //examples:package_mayhemit
+bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:package_mayhemit
 INFO: Analyzed target //examples:package_mayhemit (0 packages loaded, 1 target configured).
 INFO: From Packaging target examples/mayhemit to 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg'...:
 Generating default configuration under: bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg/Mayhemfile
@@ -350,3 +350,5 @@ INFO: Build completed successfully, 2 total actions
 - [ ] Run the `mayhem_run` targets with `bazel run` instead of `bazel build`
 - [ ] Use output flag for `mayhem run` instead of custom wrapper script
 - [ ] Tests are currently `sh_test` only and do not run on Windows
+
+If you want to help any of the above, feel free to open a PR!
