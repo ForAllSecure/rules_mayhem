@@ -61,7 +61,7 @@ jobs:
 
       - name: Run bazel build
         run: |
-          bazel build //mayhem:run_mayhemit
+          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} //mayhem:run_mayhemit
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
           MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
