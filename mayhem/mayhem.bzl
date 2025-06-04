@@ -96,44 +96,74 @@ mayhem_init = rule(
     },
 )
 
-def mayhem_login(ctx, mayhem_cli, is_windows):
+def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
     """ Logs into Mayhem 
     
     Args:
         ctx: The context
         mayhem_cli: The path to the Mayhem CLI
+        mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
         is_windows: A boolean indicating if the OS is Windows
+    Returns:
+        mayhem_login_out: The Mayhem login output file
     """
+    # if is_windows:
+    #     output_file = ctx.actions.declare_file("~\\.config\\mayhem\\mayhem")
+    # else: 
+    #     output_file = ctx.actions.declare_file("~/.config/mayhem/mayhem")
+
+    # if "MAYHEM_URL" in ctx.configuration.default_shell_env:
+    #     mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
+    #     args.add(mayhem_url)
+    # else:
+    #     fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
+
+    # if "MAYHEM_TOKEN" in ctx.configuration.default_shell_env:
+    #     mayhem_token = ctx.configuration.default_shell_env["MAYHEM_TOKEN"]
+    #     args.add(mayhem_token)
+    # else:
+    #     fail("MAYHEM_TOKEN must be set with --action_env=MAYHEM_TOKEN=<token>")
+
+    mayhem_login_out = ctx.actions.declare_file(ctx.label.name + ".login.out")
+
     if is_windows:
-        output_file = ctx.actions.declare_file("~\\.config\\mayhem\\mayhem")
-    else: 
-        output_file = ctx.actions.declare_file("~/.config/mayhem/mayhem")
-
-    args = ctx.actions.args()
-    args.add("login")
-    
-    if "MAYHEM_URL" in ctx.configuration.default_shell_env:
-        mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
-        args.add(mayhem_url)
+        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.bat")
+        login_wrapper_content = """
+        @echo off
+        setlocal
+        {mayhem_cli} login > {output_file}
+        """.format(
+            mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
+            output_file=mayhem_login_out.path.replace("/", "\\"),
+        )
     else:
-        fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
+        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.sh")
+        login_wrapper_content = """
+        #!/bin/bash
+        {mayhem_cli} login > {output_file}
+        """.format(
+            mayhem_cli=mayhem_cli.path,
+            output_file=mayhem_login_out.path,
+        )
 
-    if "MAYHEM_TOKEN" in ctx.configuration.default_shell_env:
-        mayhem_token = ctx.configuration.default_shell_env["MAYHEM_TOKEN"]
-        args.add(mayhem_token)
-    else:
-        fail("MAYHEM_TOKEN must be set with --action_env=MAYHEM_TOKEN=<token>")
+    ctx.actions.write(
+        output=login_wrapper,
+        content=login_wrapper_content
+    )
+
+    inputs = [mayhem_cli, login_wrapper]
 
     ctx.actions.run(
-        inputs = [mayhem_cli],
-        outputs = [output_file],
-        executable = mayhem_cli,
-        arguments = [args],
+        inputs = inputs,
+        outputs = [mayhem_login_out],
+        executable = login_wrapper,
         progress_message = "Logging into Mayhem...",
         use_default_shell_env = True,
     )
 
-    return
+    return mayhem_login_out
+
+
 
 def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, sarif, fail_on_defects):
     """ Waits for Mayhem to finish
@@ -208,8 +238,6 @@ def _mayhem_run_impl(ctx):
     inputs = []
     mayhem_out = ctx.actions.declare_file(ctx.label.name + ".out")
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
-
-    mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
 
     args_list = []
     args_list.append("run")
@@ -367,6 +395,10 @@ def _mayhem_run_impl(ctx):
             output_file=mayhem_out.path,
         )
 
+    # Login first
+    mayhem_login_out = mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
+    inputs.append(mayhem_login_out)
+
     # Ideally, ctx.actions.run() would support capturing stdout/stderr
     # as described in https://github.com/bazelbuild/bazel/issues/5511
     # Or, the mayhem cli itself could support an output flag
@@ -399,8 +431,8 @@ def _mayhem_run_impl(ctx):
         if not ctx.attr.duration:
             fail("The 'wait' attribute requires the 'duration' attribute to be set (otherwise, we will wait forever)")
         else:
-            mayhem_out_wait = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.junit, ctx.attr.sarif, ctx.attr.fail_on_defects)
-            return_files.append(mayhem_out_wait)    
+            mayhem_wait_out = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.junit, ctx.attr.sarif, ctx.attr.fail_on_defects)
+            return_files.append(mayhem_wait_out)    
 
     return [
         DefaultInfo(
