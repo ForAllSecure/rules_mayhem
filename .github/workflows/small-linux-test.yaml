@@ -1,4 +1,4 @@
-name: Mayhem on Windows (Bazel-based)
+name: Mayhem on Linux (Bazel-based)
 on:
   push:
   pull_request:
@@ -22,12 +22,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
         shared: [false]
         build_type: [Release]
         include:
-          - os: windows-latest
-            triplet: x64-windows
+          - os: ubuntu-latest
+            triplet: x64-linux
 
     steps:
       - uses: actions/checkout@v4
@@ -49,12 +49,12 @@ jobs:
       - name: Log into Mayhem
         run: |
           echo "Logging into Mayhem"
-          echo %USERPROFILE%
-          mkdir "%USERPROFILE%\.config\mayhem"
-          echo [DEFAULT] > "%USERPROFILE%\.config\mayhem\mayhem"
-          echo url=%MAYHEM_URL% >> "%USERPROFILE%\.config\mayhem\mayhem"
-          echo token=%MAYHEM_TOKEN% >> "%USERPROFILE%\.config\mayhem\mayhem"
-        shell: cmd
+          echo ~/
+          mkdir -p ~/.config/mayhem
+          echo "[DEFAULT]" > ~/.config/mayhem/mayhem
+          echo "url=$MAYHEM_URL" >> ~/.config/mayhem/mayhem
+          echo "token=$MAYHEM_TOKEN" >> ~/.config/mayhem/mayhem
+        shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
           MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
