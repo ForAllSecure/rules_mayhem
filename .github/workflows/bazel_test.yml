@@ -28,7 +28,7 @@ jobs:
 
       - name: Create mayhem_secrets.bzl (dummy)
         run: |
-          echo "mayhem_url=\"https://example.mayhem.security\"" > mayhem_secrets.bzl
+          echo "mayhem_url=\"https://app.mayhem.security\"" > mayhem_secrets.bzl
           echo "mayhem_token=\"AT1.example1234\"" >> mayhem_secrets.bzl
 
       - name: Run tests
