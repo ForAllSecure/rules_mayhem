@@ -111,33 +111,6 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
     Returns:
         mayhem_login_out: The Mayhem login output file
     """
-    # if is_windows:
-    #     output_file = ctx.actions.declare_file("~\\.config\\mayhem\\mayhem")
-    # else: 
-    #     output_file = ctx.actions.declare_file("~/.config/mayhem/mayhem")
-
-    # if "MAYHEM_URL" in ctx.configuration.default_shell_env:
-    #     mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
-    #     args.add(mayhem_url)
-    # else:
-    #     fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
-
-    # if "MAYHEM_TOKEN" in ctx.configuration.default_shell_env:
-    #     mayhem_token = ctx.configuration.default_shell_env["MAYHEM_TOKEN"]
-    #     args.add(mayhem_token)
-    # else:
-    #     fail("MAYHEM_TOKEN must be set with --action_env=MAYHEM_TOKEN=<token>")
-
-    #ok so current plan
-    # first, read the url and token from a config file (idk)
-    # then, set the URL and TOKEN as environment variables (see right above here: https://bazel.build/rules/windows#actions)
-    # finally, log in with the mayhem cli
-    # this solves a couple of things
-    # 1. reading from a file keeps us from leaking the token in the build logs
-    # 2. creating a file as part of this function allows us to run the login cli without having an output file (which was required...)
-    # actually maybe if we are logging in, it's not required anymore; still I'm not convinced bazel won't cache the output file which would expose the token
-    # 3. setting the environment variables allows us to run the login command without having to pass the URL and token as arguments
-
     env = dicts.add(ctx.configuration.default_shell_env, 
             {"MAYHEM_URL": mayhem_url}, 
             {"MAYHEM_TOKEN": mayhem_token}
