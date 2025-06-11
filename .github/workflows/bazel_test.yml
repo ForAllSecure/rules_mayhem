@@ -26,6 +26,11 @@ jobs:
           # Share repository cache between workflows.
           repository-cache: true
 
+      - name: Create mayhem_secrets.bzl (dummy)
+        run: |
+          echo "mayhem_url=\"https://example.mayhem.security\"" > mayhem_secrets.bzl
+          echo "mayhem_token=\"AT1.example1234\"" >> mayhem_secrets.bzl
+
       - name: Run tests
         run: |
           bazel test --test_output=all //examples:validate_factor
