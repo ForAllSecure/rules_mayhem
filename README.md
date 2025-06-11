@@ -43,8 +43,16 @@ common --enable_bzlmod
 build --spawn_strategy=standalone
 ```
 
-For environment variables, you can pass it to bazel directly, with `bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN [...]`
+### Mayhem Secrets
 
+Mayhem secrets, such as URL and token, are required to run Mayhem. Users should set these values in a secrets file, called `mayhem_secrets.bzl`, in the root of their Bazel workspace. The file should look like this:
+
+```starlark
+mayhem_url="https://app.mayhem.security"
+mayhem_token="AT1.<secret content>"
+```
+
+Make sure you add this file to your `.gitignore` so that it is not checked into version control.
 
 ## To build a Mayhemfile
 
@@ -139,7 +147,7 @@ mayhem_run(
 Then build:
 
 ```
-bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:run_factor
+bazel build //examples:run_factor
 INFO: Analyzed target //examples:run_factor (0 packages loaded, 0 targets configured).
 INFO: From Starting Mayhem run from 'examples':
 git version 2.46.0 found
@@ -190,7 +198,7 @@ INFO: 7 processes: 5 internal, 2 local.
 INFO: Build completed successfully, 7 total actions
 
 
-bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:package_mayhemit
+bazel build //examples:package_mayhemit
 INFO: Analyzed target //examples:package_mayhemit (0 packages loaded, 1 target configured).
 INFO: From Packaging target examples/mayhemit to 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg'...:
 Generating default configuration under: bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg/Mayhemfile
@@ -206,7 +214,7 @@ INFO: 2 processes: 1 internal, 1 local.
 INFO: Build completed successfully, 2 total actions
 
 
-bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:run_mayhemit
+bazel build //examples:run_mayhemit
 INFO: Analyzed target //examples:run_mayhemit (0 packages loaded, 1 target configured).
 INFO: From Starting Mayhem run from 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg':
 git version 2.46.0 found
@@ -252,7 +260,7 @@ mayhem_run(
 Then build and run:
 
 ```
-bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:run_mayhemit
+bazel build //examples:run_mayhemit
 INFO: Analyzed target //examples:run_mayhemit (56 packages loaded, 239 targets configured).
 INFO: From Packaging target examples/mayhemit to 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg'...:
 Packaging target: examples/mayhemit
@@ -316,9 +324,7 @@ mayhem_download(
 Then build and run:
 
 ```
-bazel build --action_env=MAYHEM_URL=$MAYHEM_URL --action_env=MAYHEM_TOKEN=$MAYHEM_TOKEN //examples:download_mayhemit
-
-WARNING: Build option --action_env has changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+bazel build //examples:download_mayhemit
 INFO: Analyzed target //examples:download_mayhemit (6 packages loaded, 15 targets configured).
 INFO: From Downloading Mayhem artifacts for download_mayhemit...:
 Downloading target data from run forallsecure-demo/bazel-rules/mayhemit/5...
@@ -346,6 +352,7 @@ INFO: Build completed successfully, 2 total actions
 - [x] `wait` parameter to `mayhem_run()`: Support waiting for Mayhem run to complete
 - [x] `fail_on_defects` parameter to `mayhem_run()`: Return exit code 1 if Mayhem run finds defects
 - [x] `mayhem_download` rule to grab testsuite and coverage info
+- [x] Remove support for using `--action_env` to set Mayhem secrets (this is leaky); use a `mayhem_secrets.bzl` file instead 
 - [ ] Support MacOS (currently only Linux and Windows; MacOS requires binary signing and unpackaging)
 - [ ] Run the `mayhem_run` targets with `bazel run` instead of `bazel build`
 - [ ] Use output flag for `mayhem run` instead of custom wrapper script
