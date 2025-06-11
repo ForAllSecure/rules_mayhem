@@ -62,6 +62,7 @@ jobs:
             exit /b 1
           )
           bazel build //examples:run_mayhemit
+        shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
           MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
