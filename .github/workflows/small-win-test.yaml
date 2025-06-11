@@ -1,7 +1,5 @@
-name: Mayhem on Windows (Bazel-based)
+name: Small Windows Test for rules_mayhem
 on:
-  push:
-  pull_request:
   workflow_dispatch:
     inputs:
       mayhem_url:

@@ -1,7 +1,5 @@
-name: Mayhem on Linux (Bazel-based)
+name: Small Linux Test for rules_mayhem
 on:
-  push:
-  pull_request:
   workflow_dispatch:
     inputs:
       mayhem_url:
