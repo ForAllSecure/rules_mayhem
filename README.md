@@ -11,7 +11,7 @@ You can add the following snippet:
 bazel_dep(name = "rules_mayhem", version = "0.8.0")
 
 rules_mayhem_extension = use_extension("@rules_mayhem//mayhem:extensions.bzl", "rules_mayhem_extension")
-use_repo(rules_mayhem_extension, "bazel_skylib", "mayhem_cli_linux", "mayhem_cli_windows", "platforms", "yq_cli_linux", "yq_cli_osx", "yq_cli_windows")
+use_repo(rules_mayhem_extension, "bazel_skylib", "mayhem_cli_linux", "mayhem_cli_windows", "platforms", "yq_cli_linux", "yq_cli_windows")
 ```
 
 ```
