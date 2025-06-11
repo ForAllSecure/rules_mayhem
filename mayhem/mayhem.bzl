@@ -109,10 +109,10 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
     Returns:
         mayhem_login_out: The Mayhem login output file
     """
-    env = dicts.add(ctx.configuration.default_shell_env, 
-            {"MAYHEM_URL": mayhem_url}, 
-            {"MAYHEM_TOKEN": mayhem_token}
-        )
+    # env = dicts.add(ctx.configuration.default_shell_env, 
+    #         {"MAYHEM_URL": mayhem_url}, 
+    #         {"MAYHEM_TOKEN": mayhem_token}
+    #     )
 
     mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
 
@@ -148,7 +148,7 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
         outputs = [mayhem_login_out],
         executable = login_wrapper,
         progress_message = "Logging into Mayhem...",
-        env = env,
+        use_default_shell_env = True,
     )
 
     return mayhem_login_out
