@@ -15,12 +15,13 @@ def rules_mayhem_archives():
     maybe(
         http_archive,
         name = "platforms",
-        sha256 = "218efe8ee736d26a3572663b374a253c012b716d8af0c07e842e82f238a0a7ee",
+        sha256 = "3384eb1c30762704fbe38e440204e114154086c8fc8a8c2e3e28441028c019a8",
         urls = [
-            "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz",
-            "https://github.com/bazelbuild/platforms/releases/download/0.0.10/platforms-0.0.10.tar.gz",
-        ],
+            "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/1.0.0/platforms-1.0.0.tar.gz",
+            "https://github.com/bazelbuild/platforms/releases/download/1.0.0/platforms-1.0.0.tar.gz",
+        ]
     )
+   
 
 def rules_mayhem_repositories(mayhem_url = None):
     """
@@ -57,25 +58,26 @@ def rules_mayhem_repositories(mayhem_url = None):
     maybe(
         http_file,
         name = "yq_cli_linux",
-        urls = ["https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"],
-        sha256 = "a2c097180dd884a8d50c956ee16a9cec070f30a7947cf4ebf87d5f36213e9ed7",
+        urls = ["https://github.com/mikefarah/yq/releases/download/v4.45.4/yq_linux_amd64"],
+        sha256 = "b96de04645707e14a12f52c37e6266832e03c29e95b9b139cddcae7314466e69",
         executable = True,
     )
     
     maybe(
         http_file,
         name = "yq_cli_windows",
-        urls = ["https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_windows_amd64.exe"],
-        sha256 = "d509d51e6db30ebb7c9363b7ca8714224f93a456a421d7a7819ab564b868acc7",
+        urls = ["https://github.com/mikefarah/yq/releases/download/v4.45.4/yq_windows_amd64.exe"],
+        sha256 = "844df159573a42606139ff60f2e66b791c4c06413e89473e2af25e476459fb0e",
         executable = True,
     )
 
-    maybe(
-        http_file,
-        name = "yq_cli_osx",
-        urls = ["https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_darwin_amd64"],
-        sha256 = "216ddfa03e7ba0e5aba00b236ec78324b5bfc49b610db254fe92310878baea20",
-        executable = True,
-    )
+    # Will uncomment later when we have a better solution for macOS
+    # maybe(
+    #     http_file,
+    #     name = "yq_cli_osx",
+    #     urls = ["https://github.com/mikefarah/yq/releases/download/v4.45.4/yq_darwin_amd64"],
+    #     sha256 = "5580ff2c1fc80dd91f248b3e19af2431f1c95767ad0949a60176601ca5140318",
+    #     executable = True,
+    # )
 
     rules_mayhem_archives()
