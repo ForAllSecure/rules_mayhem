@@ -50,10 +50,10 @@ jobs:
         run: |
           echo %USERPROFILE%
           mkdir "%USERPROFILE%\.config/mayhem"
-          echo [DEFAULT] > "%USERPROFILE%\.config\mayhem/mayhem"
-          echo version=0 >> "%USERPROFILE%\.config\mayhem/mayhem"
-          echo url=%MAYHEM_URL% >> "%USERPROFILE%\.config\mayhem/mayhem"
-          echo token=%MAYHEM_TOKEN% >> "%USERPROFILE%\.config\mayhem/mayhem"
+          echo [DEFAULT] > "%USERPROFILE%\.config\mayhem\mayhem"
+          echo version=0 >> "%USERPROFILE%\.config\mayhem\mayhem"
+          echo url=%MAYHEM_URL% >> "%USERPROFILE%\.config\mayhem\mayhem"
+          echo token=%MAYHEM_TOKEN% >> "%USERPROFILE%\.config\mayhem\mayhem"
         shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
@@ -61,7 +61,9 @@ jobs:
 
       - name: Run bazel build
         run: |
-          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} //examples:run_mayhemit
+          dir "%USERPROFILE%\.config\mayhem"
+          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} --action_env=XDG_CONFIG_HOME="%USERPROFILE%\.config" //examples:run_mayhemit
+        shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
           MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}

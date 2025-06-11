@@ -114,6 +114,22 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
     #         {"MAYHEM_TOKEN": mayhem_token}
     #     )
 
+    if "MAYHEM_URL" in ctx.configuration.default_shell_env:
+        mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
+    else:
+        fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
+
+    if "XDG_CONFIG_HOME" in ctx.configuration.default_shell_env:
+        xdg_config_home = ctx.configuration.default_shell_env["XDG_CONFIG_HOME"] 
+    else:
+        fail("XDG_CONFIG_HOME must be set with --action_env=XDG_CONFIG_HOME=<path>")
+
+    env = dicts.add(
+        ctx.configuration.default_shell_env,
+        {"XDG_CONFIG_HOME": xdg_config_home},
+        {"MAYHEM_URL": mayhem_url}
+    )
+
     mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
 
     if is_windows:
@@ -148,7 +164,7 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
         outputs = [mayhem_login_out],
         executable = login_wrapper,
         progress_message = "Logging into Mayhem...",
-        use_default_shell_env = True,
+        env = env,
     )
 
     return mayhem_login_out
