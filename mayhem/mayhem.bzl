@@ -1,5 +1,3 @@
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
-
 def _mayhem_init_impl(ctx):
     print("WARNING: The 'mayhem_init' rule is deprecated and will be removed in a future release. Please use 'mayhem_run' instead.")
     # Note: plan is to deprecate this in the future, but tests currently depend on validating output Mayhemfiles, so keeping it for now
@@ -114,21 +112,21 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
     #         {"MAYHEM_TOKEN": mayhem_token}
     #     )
 
-    if "MAYHEM_URL" in ctx.configuration.default_shell_env:
-        mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
-    else:
-        fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
+    # if "MAYHEM_URL" in ctx.configuration.default_shell_env:
+    #     mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
+    # else:
+    #     fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
 
-    if "XDG_CONFIG_HOME" in ctx.configuration.default_shell_env:
-        xdg_config_home = ctx.configuration.default_shell_env["XDG_CONFIG_HOME"] 
-    else:
-        fail("XDG_CONFIG_HOME must be set with --action_env=XDG_CONFIG_HOME=<path>")
+    # if "XDG_CONFIG_HOME" in ctx.configuration.default_shell_env:
+    #     xdg_config_home = ctx.configuration.default_shell_env["XDG_CONFIG_HOME"] 
+    # else:
+    #     fail("XDG_CONFIG_HOME must be set with --action_env=XDG_CONFIG_HOME=<path>")
 
-    env = dicts.add(
-        ctx.configuration.default_shell_env,
-        {"XDG_CONFIG_HOME": xdg_config_home},
-        {"MAYHEM_URL": mayhem_url}
-    )
+    # env = dicts.add(
+    #     ctx.configuration.default_shell_env,
+    #     {"XDG_CONFIG_HOME": xdg_config_home},
+    #     {"MAYHEM_URL": mayhem_url}
+    # )
 
     mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
 
@@ -164,7 +162,7 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
         outputs = [mayhem_login_out],
         executable = login_wrapper,
         progress_message = "Logging into Mayhem...",
-        env = env,
+        use_default_shell_env = True,
     )
 
     return mayhem_login_out
