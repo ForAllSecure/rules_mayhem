@@ -1,6 +1,4 @@
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("//:mayhem_secrets.bzl", "mayhem_url", "mayhem_token")
-
 
 def _mayhem_init_impl(ctx):
     print("WARNING: The 'mayhem_init' rule is deprecated and will be removed in a future release. Please use 'mayhem_run' instead.")

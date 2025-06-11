@@ -2,4 +2,3 @@ README.md export-ignore
 .bcr/ export-ignore
 .github/ export-ignore
 .github/workflows/ export-ignore
-mayhem_secrets.bzl export-ignore
