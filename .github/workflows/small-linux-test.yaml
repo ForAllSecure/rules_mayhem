@@ -46,14 +46,10 @@ jobs:
           disk-cache: ${{ github.workflow }}
           repository-cache: true
 
-      - name: Log into Mayhem
+      - name: Create mayhem_secrets.bzl
         run: |
-          echo "Logging into Mayhem"
-          echo ~/
-          mkdir -p ~/.config/mayhem
-          echo "[DEFAULT]" > ~/.config/mayhem/mayhem
-          echo "url=$MAYHEM_URL" >> ~/.config/mayhem/mayhem
-          echo "token=$MAYHEM_TOKEN" >> ~/.config/mayhem/mayhem
+          echo "mayhem_url=$MAYHEM_URL" > mayhem_secrets.bzl
+          echo "mayhem_token=$MAYHEM_TOKEN" >> mayhem_secrets.bzl
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
@@ -61,7 +57,7 @@ jobs:
 
       - name: Run bazel build
         run: |
-          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} //examples:run_mayhemit
+          bazel build //examples:run_mayhemit
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
           MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}

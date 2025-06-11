@@ -1,3 +1,7 @@
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
+load("//:mayhem_secrets.bzl", "mayhem_url", "mayhem_token")
+
+
 def _mayhem_init_impl(ctx):
     print("WARNING: The 'mayhem_init' rule is deprecated and will be removed in a future release. Please use 'mayhem_run' instead.")
     # Note: plan is to deprecate this in the future, but tests currently depend on validating output Mayhemfiles, so keeping it for now
@@ -96,72 +100,87 @@ mayhem_init = rule(
     },
 )
 
-# def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
-#     """ Logs into Mayhem 
+def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
+    """ Logs into Mayhem 
     
-#     Args:
-#         ctx: The context
-#         mayhem_cli: The path to the Mayhem CLI
-#         mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
-#         is_windows: A boolean indicating if the OS is Windows
-#     Returns:
-#         mayhem_login_out: The Mayhem login output file
-#     """
-#     # if is_windows:
-#     #     output_file = ctx.actions.declare_file("~\\.config\\mayhem\\mayhem")
-#     # else: 
-#     #     output_file = ctx.actions.declare_file("~/.config/mayhem/mayhem")
+    Args:
+        ctx: The context
+        mayhem_cli: The path to the Mayhem CLI
+        mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
+        is_windows: A boolean indicating if the OS is Windows
+    Returns:
+        mayhem_login_out: The Mayhem login output file
+    """
+    # if is_windows:
+    #     output_file = ctx.actions.declare_file("~\\.config\\mayhem\\mayhem")
+    # else: 
+    #     output_file = ctx.actions.declare_file("~/.config/mayhem/mayhem")
 
-#     # if "MAYHEM_URL" in ctx.configuration.default_shell_env:
-#     #     mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
-#     #     args.add(mayhem_url)
-#     # else:
-#     #     fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
+    # if "MAYHEM_URL" in ctx.configuration.default_shell_env:
+    #     mayhem_url = ctx.configuration.default_shell_env["MAYHEM_URL"]
+    #     args.add(mayhem_url)
+    # else:
+    #     fail("MAYHEM_URL must be set with --action_env=MAYHEM_URL=<url>")
 
-#     # if "MAYHEM_TOKEN" in ctx.configuration.default_shell_env:
-#     #     mayhem_token = ctx.configuration.default_shell_env["MAYHEM_TOKEN"]
-#     #     args.add(mayhem_token)
-#     # else:
-#     #     fail("MAYHEM_TOKEN must be set with --action_env=MAYHEM_TOKEN=<token>")
+    # if "MAYHEM_TOKEN" in ctx.configuration.default_shell_env:
+    #     mayhem_token = ctx.configuration.default_shell_env["MAYHEM_TOKEN"]
+    #     args.add(mayhem_token)
+    # else:
+    #     fail("MAYHEM_TOKEN must be set with --action_env=MAYHEM_TOKEN=<token>")
 
-#     mayhem_login_out = ctx.actions.declare_file(ctx.label.name + ".login.out")
+    #ok so current plan
+    # first, read the url and token from a config file (idk)
+    # then, set the URL and TOKEN as environment variables (see right above here: https://bazel.build/rules/windows#actions)
+    # finally, log in with the mayhem cli
+    # this solves a couple of things
+    # 1. reading from a file keeps us from leaking the token in the build logs
+    # 2. creating a file as part of this function allows us to run the login cli without having an output file (which was required...)
+    # actually maybe if we are logging in, it's not required anymore; still I'm not convinced bazel won't cache the output file which would expose the token
+    # 3. setting the environment variables allows us to run the login command without having to pass the URL and token as arguments
 
-#     if is_windows:
-#         login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.bat")
-#         login_wrapper_content = """
-#         @echo off
-#         setlocal
-#         {mayhem_cli} login > {output_file}
-#         """.format(
-#             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
-#             output_file=mayhem_login_out.path.replace("/", "\\"),
-#         )
-#     else:
-#         login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.sh")
-#         login_wrapper_content = """
-#         #!/bin/bash
-#         {mayhem_cli} login > {output_file}
-#         """.format(
-#             mayhem_cli=mayhem_cli.path,
-#             output_file=mayhem_login_out.path,
-#         )
+    env = dicts.add(ctx.configuration.default_shell_env, 
+            {"MAYHEM_URL": mayhem_url}, 
+            {"MAYHEM_TOKEN": mayhem_token}
+        )
 
-#     ctx.actions.write(
-#         output=login_wrapper,
-#         content=login_wrapper_content
-#     )
+    mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
 
-#     inputs = [mayhem_cli, login_wrapper]
+    if is_windows:
+        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.bat")
+        login_wrapper_content = """
+        @echo off
+        setlocal
+        {mayhem_cli} login > {output_file}
+        """.format(
+            mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
+            output_file=mayhem_login_out.path.replace("/", "\\"),
+        )
+    else:
+        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.sh")
+        login_wrapper_content = """
+        #!/bin/bash
+        {mayhem_cli} login > {output_file}
+        """.format(
+            mayhem_cli=mayhem_cli.path,
+            output_file=mayhem_login_out.path,
+        )
 
-#     ctx.actions.run(
-#         inputs = inputs,
-#         outputs = [mayhem_login_out],
-#         executable = login_wrapper,
-#         progress_message = "Logging into Mayhem...",
-#         use_default_shell_env = True,
-#     )
+    ctx.actions.write(
+        output=login_wrapper,
+        content=login_wrapper_content
+    )
 
-#     return mayhem_login_out
+    inputs = [mayhem_cli, login_wrapper]
+
+    ctx.actions.run(
+        inputs = inputs,
+        outputs = [mayhem_login_out],
+        executable = login_wrapper,
+        progress_message = "Logging into Mayhem...",
+        env = env,
+    )
+
+    return mayhem_login_out
 
 
 
@@ -387,7 +406,7 @@ def _mayhem_run_impl(ctx):
         wrapper_content = """
         #!/bin/bash
         echo -n {owner} > {output_file}
-        {mayhem_cli} {args} >> {output_file}
+        {mayhem_cli} --verbosity debug {args} >> {output_file}
         """.format(
             owner=ctx.attr.owner + "/" if ctx.attr.owner else "",
             mayhem_cli=ctx.executable._mayhem_cli.path,
@@ -396,8 +415,8 @@ def _mayhem_run_impl(ctx):
         )
 
     # Login first
-    # mayhem_login_out = mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
-    # inputs.append(mayhem_login_out)
+    mayhem_login_out = mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
+    inputs.append(mayhem_login_out)
 
     # Ideally, ctx.actions.run() would support capturing stdout/stderr
     # as described in https://github.com/bazelbuild/bazel/issues/5511
@@ -540,7 +559,7 @@ def _mayhem_download_impl(ctx):
     mayhem_cli = ctx.executable._mayhem_cli
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
-    # mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
+    mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
 
 
     args = ctx.actions.args()
