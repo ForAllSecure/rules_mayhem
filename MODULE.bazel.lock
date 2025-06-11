@@ -138,11 +138,13 @@
   "moduleExtensions": {
     "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
-        "bzlTransitiveDigest": "cxMfv58GoMJcSkq4e3LpG0b07us+W8NSShGKLNoUWmE=",
-        "usagesDigest": "d3Q11zmMcaP6d60+KVJbp7f/XCujd+TmgLZaQtV1ZUE=",
+        "bzlTransitiveDigest": "QXrwS+MaUXAuRADmpi4iR+vh8m0INIiGS8EaMviNSUs=",
+        "usagesDigest": "XE0utA0bpUHCiv0xi9mfp5fgoEEJyHRfSMaXWPOwF0A=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
-        "envVariables": {},
+        "envVariables": {
+          "MAYHEM_URL": "https://app.mayhem.security"
+        },
         "generatedRepoSpecs": {
           "mayhem_cli_linux": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",

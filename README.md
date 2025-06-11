@@ -8,7 +8,7 @@ You can add the following snippet:
 
 ```
 ## MODULE.bazel
-bazel_dep(name = "rules_mayhem", version = "0.8.0")
+bazel_dep(name = "rules_mayhem", version = "0.8.1")
 
 rules_mayhem_extension = use_extension("@rules_mayhem//mayhem:extensions.bzl", "rules_mayhem_extension")
 use_repo(rules_mayhem_extension, "bazel_skylib", "mayhem_cli_linux", "mayhem_cli_windows", "platforms", "yq_cli_linux", "yq_cli_windows")
@@ -21,7 +21,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_mayhem",
     strip_prefix = "rules_mayhem",
-    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.8.0/rules_mayhem-0.8.0.tar.gz"],
+    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.8.1/rules_mayhem-0.8.1.tar.gz"],
     sha256 = "ed430eebdbb058a2fca2a2ddb8c04540606cc318812715db8072a9c72b2f04e2",
 )
 
@@ -43,16 +43,46 @@ common --enable_bzlmod
 build --spawn_strategy=standalone
 ```
 
-### Mayhem Secrets
+### Logging into Mayhem
 
-Mayhem secrets, such as URL and token, are required to run Mayhem. Users should set these values in a secrets file, called `mayhem_secrets.bzl`, in the root of their Bazel workspace. The file should look like this:
+To use Mayhem, you need to generate a token for your account. You can do this by logging into the Mayhem web interface and navigating to Account Settings -> API Tokens. 
 
-```starlark
-mayhem_url="https://app.mayhem.security"
-mayhem_token="AT1.<secret content>"
+When logging in via the CLI, Mayhem will create a configuration file under `~/.config/mayhem/mayhem`. This is the default location - you can change it by setting the `XDG_CONFIG_HOME` environment variable to a different directory. 
+
+With Bazel, we simulate the login process by creating a config file and then passing `--action_env=XDG_CONFIG_HOME=/path/to/your/config` to the `bazel build` command line. To do this:
+
+1. Create a config file with the following content:
+
+```yaml
+[DEFAULT]
+url = https://<your_mayhem_instance>
+token = AT1.<your_token_here>
+```
+By default, this file is created at `~/.config/mayhem/mayhem` when you log in via the CLI, but you can choose a different location if you prefer.
+
+2. Run `bazel build` with the `--action_env` flags to specify the Mayhem URL and configuration file location:
+
+On Linux:
+```bash
+bazel build --action_env=MAYHEM_URL="$MAYHEM_URL" --action_env=XDG_CONFIG_HOME="$HOME/.config" //examples:run_mayhemit
 ```
 
-Make sure you add this file to your `.gitignore` so that it is not checked into version control.
+On Windows:
+```
+bazel build --action_env=MAYHEM_URL="%MAYHEM_URL%" --action_env=XDG_CONFIG_HOME="%USERPROFILE%\.config" //examples:run_mayhemit
+```
+
+Instead of adding these flags to every `bazel build` command, you can also add them to your `.bazelrc` file:
+
+```
+# .bazelrc
+build --action_env=MAYHEM_URL=<your_mayhem_url>
+build --action_env=XDG_CONFIG_HOME=<path_to_your_config>
+```
+
+Note that while the command line will expand your environment variables, the `.bazelrc` file will not. You need to replace `<your_mayhem_url>` and `<path_to_your_config>` with the actual values if you use `.bazelrc`.
+
+The remainder of this document assumes that you have set up your Mayhem configuration in your `.bazelrc`, and omits the `--action_env` flags from the `bazel build` commands for brevity.
 
 ## To build a Mayhemfile
 

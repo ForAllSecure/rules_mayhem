@@ -3,4 +3,3 @@ bazel-out
 bazel-rules_mayhem
 bazel-testlogs
 pkg
-mayhem_secrets.bzl

@@ -1,0 +1,67 @@
+name: Mayhem on Linux (Bazel-based)
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      mayhem_url:
+        description: 'Mayhem URL'
+        required: true
+        default: 'https://app.mayhem.security'
+
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  MAYHEM_URL: ${{ github.event.inputs.mayhem_url || 'https://app.mayhem.security' }}
+  MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
+
+jobs:
+  build:
+    name: '${{ matrix.os }} shared=${{ matrix.shared }} ${{ matrix.build_type }}'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        shared: [false]
+        build_type: [Release]
+        include:
+          - os: ubuntu-latest
+            triplet: x64-linux
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Prep Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install Bazel
+        uses: bazel-contrib/setup-bazel@0.8.5
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: Log into Mayhem
+        run: |
+          echo "Logging into Mayhem"
+          echo ~/
+          mkdir -p ~/.config/mayhem
+          echo "[DEFAULT]" > ~/.config/mayhem/mayhem
+          echo "url=$MAYHEM_URL" >> ~/.config/mayhem/mayhem
+          echo "token=$MAYHEM_TOKEN" >> ~/.config/mayhem/mayhem
+        shell: bash
+        env:
+          MAYHEM_URL: ${{ env.MAYHEM_URL }}
+          MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
+
+      - name: Run bazel build
+        run: |
+          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} --action_env=XDG_CONFIG_HOME="$HOME/.config" //examples:run_mayhemit
+        env:
+          MAYHEM_URL: ${{ env.MAYHEM_URL }}
+          MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
