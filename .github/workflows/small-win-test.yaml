@@ -49,7 +49,7 @@ jobs:
       - name: Create mayhem_secrets.bzl
         run: |
           echo mayhem_url="%MAYHEM_URL%" > mayhem_secrets.bzl
-          echo token="%MAYHEM_TOKEN%" >> mayhem_secrets.bzl
+          echo mayhem_token="%MAYHEM_TOKEN%" >> mayhem_secrets.bzl
         shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
