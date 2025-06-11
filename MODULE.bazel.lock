@@ -138,7 +138,7 @@
   "moduleExtensions": {
     "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
-        "bzlTransitiveDigest": "asbanR2NdIAnQHXVDzr07jdlIbOVRoQteqKs0Iyi36M=",
+        "bzlTransitiveDigest": "cxMfv58GoMJcSkq4e3LpG0b07us+W8NSShGKLNoUWmE=",
         "usagesDigest": "uSYlwATQpaqZYXtSmPCEvR/M+4+UvSOfBBUEE4mcQ7w=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

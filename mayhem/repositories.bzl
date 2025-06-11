@@ -21,16 +21,7 @@ def rules_mayhem_archives():
             "https://github.com/bazelbuild/platforms/releases/download/1.0.0/platforms-1.0.0.tar.gz",
         ]
     )
-
-def rules_mayhem_config(mayhem_url):
-    """
-    This function sets up the configuration for the Mayhem rules.
-
-    Args:
-        mayhem_url: The URL to the Mayhem platform.
-    """
-
-    
+   
 
 def rules_mayhem_repositories(mayhem_url = None):
     """
