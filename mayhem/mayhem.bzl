@@ -133,7 +133,9 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
     """
     mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
 
-    if is_windows and mayhem_cli_exe is not None:
+    if is_windows:
+        if mayhem_cli_exe == None:
+            mayhem_cli_exe = create_or_retrieve_windows_symlink(ctx, mayhem_cli.path)
         login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.bat")
         login_wrapper_content = """
         @echo off
