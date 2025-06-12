@@ -107,7 +107,6 @@ def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
     Returns:
         mayhem_login_out: The Mayhem login output file
     """
-
     mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
 
     if is_windows:
