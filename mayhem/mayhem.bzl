@@ -96,81 +96,79 @@ mayhem_init = rule(
     },
 )
 
-def create_or_retrieve_windows_symlink(ctx, mayhem_cli_path):
-    """ Creates a Windows symlink for the Mayhem CLI
+# def create_or_retrieve_windows_symlink(ctx, mayhem_cli_path):
+#     """ Creates a Windows symlink for the Mayhem CLI
     
-    Args:
-        ctx: The context
-        mayhem_cli_path: The path to the Mayhem CLI executable
+#     Args:
+#         ctx: The context
+#         mayhem_cli_path: The path to the Mayhem CLI executable
     
-    Returns:
-        mayhem_cli_exe: The path to the Mayhem CLI with .exe extension
-    """
-    # Check if file already exists
-    mayhem_cli_exe = mayhem_cli_path + ".exe"
-    if mayhem_cli_exe.exists():
-        return mayhem_cli_exe
-    else:
-        mayhem_cli_exe = ctx.actions.declare_symlink(mayhem_cli_path + ".exe")
-        ctx.actions.symlink(
-            output = mayhem_cli_exe,
-            target_file = ctx.executable._mayhem_cli,
-            is_executable = True,
-        )
+#     Returns:
+#         mayhem_cli_exe: The path to the Mayhem CLI with .exe extension
+#     """
+#     # Check if file already exists
+#     mayhem_cli_exe = mayhem_cli_path + ".exe"
+#     if mayhem_cli_exe.exists():
+#         return mayhem_cli_exe
+#     else:
+#         mayhem_cli_exe = ctx.actions.declare_symlink(mayhem_cli_path + ".exe")
+#         ctx.actions.symlink(
+#             output = mayhem_cli_exe,
+#             target_file = ctx.executable._mayhem_cli,
+#             is_executable = True,
+#         )
 
-    return mayhem_cli_exe
+#     return mayhem_cli_exe
 
-def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
-    """ Logs into Mayhem 
+# def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
+#     """ Logs into Mayhem 
     
-    Args:
-        ctx: The context
-        mayhem_cli: The path to the Mayhem CLI
-        mayhem_cli_exe: The path to the Mayhem CLI with .exe extension, or None if we are on Linux
-        is_windows: A boolean indicating if the OS is Windows
-    Returns:
-        mayhem_login_out: The Mayhem login output file
-    """
-    mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
+#     Args:
+#         ctx: The context
+#         mayhem_cli: The path to the Mayhem CLI
+#         mayhem_cli_exe: The path to the Mayhem CLI with .exe extension, or None if we are on Linux
+#         is_windows: A boolean indicating if the OS is Windows
+#     Returns:
+#         mayhem_login_out: The Mayhem login output file
+#     """
+#     mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
 
-    if is_windows:
-        if mayhem_cli_exe == None:
-            mayhem_cli_exe = create_or_retrieve_windows_symlink(ctx, mayhem_cli.path)
-        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.bat")
-        login_wrapper_content = """
-        @echo off
-        setlocal
-        {mayhem_cli} login > {output_file}
-        """.format(
-            mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
-            output_file=mayhem_login_out.path.replace("/", "\\"),
-        )
-    else:
-        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.sh")
-        login_wrapper_content = """
-        #!/bin/bash
-        {mayhem_cli} login > {output_file}
-        """.format(
-            mayhem_cli=mayhem_cli.path,
-            output_file=mayhem_login_out.path,
-        )
+#     if is_windows:
+#         login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.bat")
+#         login_wrapper_content = """
+#         @echo off
+#         setlocal
+#         {mayhem_cli} login > {output_file}
+#         """.format(
+#             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
+#             output_file=mayhem_login_out.path.replace("/", "\\"),
+#         )
+#     else:
+#         login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.sh")
+#         login_wrapper_content = """
+#         #!/bin/bash
+#         {mayhem_cli} login > {output_file}
+#         """.format(
+#             mayhem_cli=mayhem_cli.path,
+#             output_file=mayhem_login_out.path,
+#         )
 
-    ctx.actions.write(
-        output=login_wrapper,
-        content=login_wrapper_content
-    )
+#     ctx.actions.write(
+#         output=login_wrapper,
+#         content=login_wrapper_content
+#     )
 
-    inputs = [mayhem_cli, login_wrapper]
+#     inputs = [mayhem_cli, login_wrapper]
 
-    ctx.actions.run(
-        inputs = inputs,
-        outputs = [mayhem_login_out],
-        executable = login_wrapper,
-        progress_message = "Logging into Mayhem...",
-        use_default_shell_env = True,
-    )
+#     ctx.actions.run(
+#         inputs = inputs,
+#         outputs = [mayhem_login_out],
+#         executable = login_wrapper,
+#         progress_message = "Logging into Mayhem...",
+#         use_default_shell_env = True,
+#     )
 
-    return mayhem_login_out
+#     return mayhem_login_out
 
 
 
@@ -368,7 +366,14 @@ def _mayhem_run_impl(ctx):
 
     if is_windows:
         # Need to copy the Mayhem CLI to have .exe extension
-        mayhem_cli_exe = create_or_retrieve_windows_symlink(ctx, ctx.executable._mayhem_cli.path)
+        mayhem_cli_exe = ctx.actions.declare_symlink(ctx.executable._mayhem_cli + ".exe")
+
+        ctx.actions.symlink(
+            output = mayhem_cli_exe,
+            target_file = ctx.executable._mayhem_cli,
+            is_executable = True,
+        )
+
         inputs.append(mayhem_cli_exe)
 
         wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
@@ -398,8 +403,8 @@ def _mayhem_run_impl(ctx):
         )
 
     # Login first
-    mayhem_login_out = mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
-    inputs.append(mayhem_login_out)
+    # mayhem_login_out = mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
+    # inputs.append(mayhem_login_out)
 
     # Ideally, ctx.actions.run() would support capturing stdout/stderr
     # as described in https://github.com/bazelbuild/bazel/issues/5511
@@ -540,15 +545,15 @@ def _mayhem_download_impl(ctx):
     else:
         output_dir = ctx.actions.declare_directory(ctx.attr.target + "-pkg")
     mayhem_cli = ctx.executable._mayhem_cli
-    is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
+    # is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
-    if is_windows:
-        # Create a symlink for the Mayhem CLI with .exe extension
-        mayhem_cli_exe = create_or_retrieve_windows_symlink(ctx, ctx.executable._mayhem_cli.path)
-    else:
-        mayhem_cli_exe = None
+    # if is_windows:
+    #     # Create a symlink for the Mayhem CLI with .exe extension
+    #     mayhem_cli_exe = create_or_retrieve_windows_symlink(ctx, ctx.executable._mayhem_cli.path)
+    # else:
+    #     mayhem_cli_exe = None
 
-    mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
+    # mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
 
 
     args = ctx.actions.args()
