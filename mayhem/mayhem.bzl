@@ -326,7 +326,6 @@ def _mayhem_run_impl(ctx):
             output_file=mayhem_out.path,
         )
 
-
     # Ideally, ctx.actions.run() would support capturing stdout/stderr
     # as described in https://github.com/bazelbuild/bazel/issues/5511
     # Or, the mayhem cli itself could support an output flag
@@ -465,7 +464,7 @@ def _mayhem_download_impl(ctx):
         output_dir = ctx.actions.declare_directory(ctx.attr.output_dir)
     else:
         output_dir = ctx.actions.declare_directory(ctx.attr.target + "-pkg")
-    mayhem_cli_linux = ctx.executable._mayhem_cli
+    mayhem_cli = ctx.executable._mayhem_cli
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
     args = ctx.actions.args()
@@ -476,19 +475,6 @@ def _mayhem_download_impl(ctx):
         args.add(ctx.attr.owner + "/" + ctx.attr.project + "/" + ctx.attr.target)
     else:
         args.add(ctx.attr.project + "/" + ctx.attr.target)
-
-    if is_windows:
-         # Need to copy the Mayhem CLI to have .exe extension
-        mayhem_cli_exe = ctx.actions.declare_file(ctx.executable._mayhem_cli.path + ".exe")
-
-        ctx.actions.symlink(
-            output = mayhem_cli_exe,
-            target_file = ctx.executable._mayhem_cli,
-            is_executable = True,
-        )
-        mayhem_cli = mayhem_cli_exe
-    else:
-        mayhem_cli = mayhem_cli_linux
 
     ctx.actions.run(
         outputs = [output_dir],
@@ -503,7 +489,6 @@ def _mayhem_download_impl(ctx):
             files = depset([output_dir]),
         ),
     ]
-    
 
 
 mayhem_download = rule(
