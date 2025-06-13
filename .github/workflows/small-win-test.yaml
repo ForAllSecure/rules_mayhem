@@ -67,5 +67,6 @@ jobs:
       - name: Run download
         run: |
           bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} --action_env=XDG_CONFIG_HOME="%USERPROFILE%\.config" //examples:download_mayhemit
+        shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
