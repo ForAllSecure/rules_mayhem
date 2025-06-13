@@ -96,58 +96,6 @@ mayhem_init = rule(
     },
 )
 
-def mayhem_login(ctx, mayhem_cli, mayhem_cli_exe, is_windows):
-    """ Logs into Mayhem 
-    
-    Args:
-        ctx: The context
-        mayhem_cli: The path to the Mayhem CLI
-        mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
-        is_windows: A boolean indicating if the OS is Windows
-    Returns:
-        mayhem_login_out: The Mayhem login output file
-    """
-    mayhem_login_out = ctx.actions.declare_file(ctx.label.name + "-login.out")
-
-    if is_windows:
-        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.bat")
-        login_wrapper_content = """
-        @echo off
-        setlocal
-        {mayhem_cli} login > {output_file}
-        """.format(
-            mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
-            output_file=mayhem_login_out.path.replace("/", "\\"),
-        )
-    else:
-        login_wrapper = ctx.actions.declare_file(ctx.label.name + "-login.sh")
-        login_wrapper_content = """
-        #!/bin/bash
-        {mayhem_cli} login > {output_file}
-        """.format(
-            mayhem_cli=mayhem_cli.path,
-            output_file=mayhem_login_out.path,
-        )
-
-    ctx.actions.write(
-        output=login_wrapper,
-        content=login_wrapper_content
-    )
-
-    inputs = [mayhem_cli, login_wrapper]
-
-    ctx.actions.run(
-        inputs = inputs,
-        outputs = [mayhem_login_out],
-        executable = login_wrapper,
-        progress_message = "Logging into Mayhem...",
-        use_default_shell_env = True,
-    )
-
-    return mayhem_login_out
-
-
-
 def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, sarif, fail_on_defects):
     """ Waits for Mayhem to finish
     
@@ -341,7 +289,7 @@ def _mayhem_run_impl(ctx):
         args_list.append("--insecure")
 
     if is_windows:
-        # Need to copy the Mayhem CLI to have .exe extension
+         # Need to copy the Mayhem CLI to have .exe extension
         mayhem_cli_exe = ctx.actions.declare_file(ctx.executable._mayhem_cli.path + ".exe")
 
         ctx.actions.symlink(
@@ -377,10 +325,6 @@ def _mayhem_run_impl(ctx):
             args=" ".join(['{}'.format(arg) for arg in args_list]),
             output_file=mayhem_out.path,
         )
-
-    # Login first
-    mayhem_login_out = mayhem_login(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, is_windows)
-    inputs.append(mayhem_login_out)
 
     # Ideally, ctx.actions.run() would support capturing stdout/stderr
     # as described in https://github.com/bazelbuild/bazel/issues/5511
@@ -523,9 +467,6 @@ def _mayhem_download_impl(ctx):
     mayhem_cli = ctx.executable._mayhem_cli
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
-    mayhem_login(ctx, ctx.executable._mayhem_cli, is_windows)
-
-
     args = ctx.actions.args()
     args.add("download")
     args.add("-o", output_dir.path)
@@ -548,7 +489,6 @@ def _mayhem_download_impl(ctx):
             files = depset([output_dir]),
         ),
     ]
-    
 
 
 mayhem_download = rule(

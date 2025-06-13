@@ -139,11 +139,11 @@
     "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
         "bzlTransitiveDigest": "QXrwS+MaUXAuRADmpi4iR+vh8m0INIiGS8EaMviNSUs=",
-        "usagesDigest": "XE0utA0bpUHCiv0xi9mfp5fgoEEJyHRfSMaXWPOwF0A=",
+        "usagesDigest": "ZKttRTAXvQeHIHxQrsY8nAdZUjOP2qqgZipsJGQtg0I=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {
-          "MAYHEM_URL": "https://app.mayhem.security"
+          "MAYHEM_URL": null
         },
         "generatedRepoSpecs": {
           "mayhem_cli_linux": {

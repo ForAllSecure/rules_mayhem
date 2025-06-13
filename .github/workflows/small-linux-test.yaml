@@ -60,6 +60,13 @@ jobs:
       - name: Run bazel build
         run: |
           bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} --action_env=XDG_CONFIG_HOME="$HOME/.config" //examples:run_mayhemit
+        shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
-          MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
+
+      - name: Run download
+        run: |
+          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} --action_env=XDG_CONFIG_HOME="$HOME/.config" //examples:download_mayhemit
+        shell: bash
+        env:
+          MAYHEM_URL: ${{ env.MAYHEM_URL }}
