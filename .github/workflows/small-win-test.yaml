@@ -61,13 +61,6 @@ jobs:
 
       - name: Run bazel build
         run: |
-          echo %XDG_CONFIG_HOME%
-          echo "%USERPROFILE%\.config"
-          type "%USERPROFILE%\.config\mayhem\mayhem"
-          type %XDG_CONFIG_HOME%\mayhem\mayhem
-          type "%XDG_CONFIG_HOME%\mayhem\mayhem"
-          file "%XDG_CONFIG_HOME%\mayhem\mayhem"
-          file "%USERPROFILE%\.config\mayhem\mayhem"
           bazel build --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:run_mayhemit
         shell: cmd
         env:
