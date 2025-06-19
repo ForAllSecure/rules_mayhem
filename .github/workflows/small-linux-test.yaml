@@ -52,6 +52,7 @@ jobs:
           echo "[DEFAULT]" > $HOME/.config/mayhem/mayhem
           echo "url=$MAYHEM_URL" >> $HOME/.config/mayhem/mayhem
           echo "token=$MAYHEM_TOKEN" >> $HOME/.config/mayhem/mayhem
+          echo XDG_CONFIG_HOME=$HOME/.config >> $GITHUB_ENV
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
@@ -64,7 +65,7 @@ jobs:
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
-          XDG_CONFIG_HOME: "$HOME/.config"
+          XDG_CONFIG_HOME: ${{ env.XDG_CONFIG_HOME }}
 
       - name: Run download
         run: |
@@ -72,4 +73,4 @@ jobs:
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
-          XDG_CONFIG_HOME: "$HOME/.config"
+          XDG_CONFIG_HOME: ${{ env.XDG_CONFIG_HOME }}
