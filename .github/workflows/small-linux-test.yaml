@@ -48,7 +48,7 @@ jobs:
         run: |
           echo "Logging into Mayhem"
           echo $HOME
-          mkdir -p ~/.config/mayhem
+          mkdir -p $HOME/.config/mayhem
           echo "[DEFAULT]" > $HOME/.config/mayhem/mayhem
           echo "url=$MAYHEM_URL" >> $HOME/.config/mayhem/mayhem
           echo "token=$MAYHEM_TOKEN" >> $HOME/.config/mayhem/mayhem
@@ -59,6 +59,7 @@ jobs:
 
       - name: Run bazel build
         run: |
+          echo $XDG_CONFIG_HOME
           bazel build --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:run_mayhemit
         shell: bash
         env:
