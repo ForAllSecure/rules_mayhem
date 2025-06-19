@@ -53,7 +53,7 @@ jobs:
           echo version=0 >> "%USERPROFILE%\.config\mayhem\mayhem"
           echo url=%MAYHEM_URL% >> "%USERPROFILE%\.config\mayhem\mayhem"
           echo token=%MAYHEM_TOKEN% >> "%USERPROFILE%\.config\mayhem\mayhem"
-          echo XDG_CONFIG_HOME="%USERPROFILE%\.config" >> "%GITHUB_ENV%"
+          echo XDG_CONFIG_HOME=%USERPROFILE%/.config >> "%GITHUB_ENV%"
         shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
