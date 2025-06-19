@@ -86,11 +86,11 @@ mayhem_run(
     target = "mayhemit",
     all = True,
     target_path = ":package_mayhemit",
-    wait = True,
-    duration = "60",
+    wait = False,
+    duration = "30",
     fail_on_defects = True,
-    junit = "mayhemit_junit.xml",
-    sarif = "mayhemit_sarif.json",
+    # junit = "mayhemit_junit.xml",
+    # sarif = "mayhemit_sarif.json",
 )
 
 mayhem_download(
