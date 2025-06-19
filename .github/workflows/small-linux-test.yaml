@@ -60,7 +60,6 @@ jobs:
 
       - name: Run bazel build
         run: |
-          echo $XDG_CONFIG_HOME
           bazel build --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:run_mayhemit
         shell: bash
         env:
