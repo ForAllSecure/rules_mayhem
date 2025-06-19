@@ -63,7 +63,7 @@ jobs:
         shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
-          XDG_CONFIG_HOME: "%USERPROFILE%\.config"
+          XDG_CONFIG_HOME: "%USERPROFILE%\\.config"
 
       - name: Run download
         run: |
@@ -71,4 +71,4 @@ jobs:
         shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
-          XDG_CONFIG_HOME: "%USERPROFILE%\.config"
+          XDG_CONFIG_HOME: "%USERPROFILE%\\.config"
