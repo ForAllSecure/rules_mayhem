@@ -49,7 +49,7 @@ To use Mayhem, you need to generate a token for your account. You can do this by
 
 When logging in via the CLI, Mayhem will create a configuration file under `~/.config/mayhem/mayhem`. This is the default location - you can change it by setting the `XDG_CONFIG_HOME` environment variable to a different directory. 
 
-With Bazel, we simulate the login process by creating a config file and then passing `--action_env=XDG_CONFIG_HOME=/path/to/your/config` to the `bazel build` command line. To do this:
+With Bazel, we simulate the login process by creating a config file located in the `XDG_CONFIG_HOME/mayhem` directory. You can either pass this value to the `bazel build` command line directly, like so:
 
 1. Create a config file with the following content:
 
@@ -60,27 +60,33 @@ token = AT1.<your_token_here>
 ```
 By default, this file is created at `~/.config/mayhem/mayhem` when you log in via the CLI, but you can choose a different location if you prefer.
 
-2. Run `bazel build` with the `--action_env` flags to specify the Mayhem URL and configuration file location:
+2. Export the `MAYHEM_URL` and `XDG_CONFIG_HOME` environment variables in your shell environment.
 
 On Linux:
 ```bash
-bazel build --action_env=MAYHEM_URL="$MAYHEM_URL" --action_env=XDG_CONFIG_HOME="$HOME/.config" //examples:run_mayhemit
+export MAYHEM_URL="https://<your_mayhem_instance>"
+export XDG_CONFIG_HOME="$HOME/.config"
 ```
 
 On Windows:
+```cmd
+set MAYHEM_URL=https://<your_mayhem_instance>
+set XDG_CONFIG_HOME=%USERPROFILE%\.config
 ```
-bazel build --action_env=MAYHEM_URL="%MAYHEM_URL%" --action_env=XDG_CONFIG_HOME="%USERPROFILE%\.config" //examples:run_mayhemit
+
+3. Run `bazel build` with the `--action_env` flags to specify the Mayhem URL and configuration file location:
+
+```bash
+bazel build --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:run_mayhemit
 ```
 
 Instead of adding these flags to every `bazel build` command, you can also add them to your `.bazelrc` file:
 
 ```
 # .bazelrc
-build --action_env=MAYHEM_URL=<your_mayhem_url>
-build --action_env=XDG_CONFIG_HOME=<path_to_your_config>
+build --action_env=MAYHEM_URL
+build --action_env=XDG_CONFIG_HOME
 ```
-
-Note that while the command line will expand your environment variables, the `.bazelrc` file will not. You need to replace `<your_mayhem_url>` and `<path_to_your_config>` with the actual values if you use `.bazelrc`.
 
 The remainder of this document assumes that you have set up your Mayhem configuration in your `.bazelrc`, and omits the `--action_env` flags from the `bazel build` commands for brevity.
 

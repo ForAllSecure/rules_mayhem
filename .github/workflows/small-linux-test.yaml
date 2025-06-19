@@ -47,11 +47,11 @@ jobs:
       - name: Log into Mayhem
         run: |
           echo "Logging into Mayhem"
-          echo ~/
+          echo $HOME
           mkdir -p ~/.config/mayhem
-          echo "[DEFAULT]" > ~/.config/mayhem/mayhem
-          echo "url=$MAYHEM_URL" >> ~/.config/mayhem/mayhem
-          echo "token=$MAYHEM_TOKEN" >> ~/.config/mayhem/mayhem
+          echo "[DEFAULT]" > $HOME/.config/mayhem/mayhem
+          echo "url=$MAYHEM_URL" >> $HOME/.config/mayhem/mayhem
+          echo "token=$MAYHEM_TOKEN" >> $HOME/.config/mayhem/mayhem
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
@@ -59,14 +59,16 @@ jobs:
 
       - name: Run bazel build
         run: |
-          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} --action_env=XDG_CONFIG_HOME="$HOME/.config" //examples:run_mayhemit
+          bazel build --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:run_mayhemit
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
+          XDG_CONFIG_HOME: "$HOME/.config"
 
       - name: Run download
         run: |
-          bazel build --action_env=MAYHEM_URL=${{ env.MAYHEM_URL }} --action_env=XDG_CONFIG_HOME="$HOME/.config" //examples:download_mayhemit
+          bazel build --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:download_mayhemit
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
+          XDG_CONFIG_HOME: "$HOME/.config"
