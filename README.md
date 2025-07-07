@@ -43,6 +43,13 @@ common --enable_bzlmod
 build --spawn_strategy=standalone
 ```
 
+If you are seeing errors with Mayhem and writing to log files, you should also add the following to your `.bazelrc`:
+
+```
+# Disable Mayhem log file creation
+build --repo_env=MAYHEM_LOG_NOFILE=1
+```
+
 ### Logging into Mayhem
 
 To use Mayhem, you need to generate a token for your account. You can do this by logging into the Mayhem web interface and navigating to Account Settings -> API Tokens. 
