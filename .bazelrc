@@ -7,3 +7,6 @@ build --spawn_strategy=standalone
 # Set action envs for Mayhem
 build --action_env=MAYHEM_URL
 build --action_env=XDG_CONFIG_HOME
+
+# Disable Mayhem log file creation
+build --repo_env=MAYHEM_LOG_NOFILE=1
