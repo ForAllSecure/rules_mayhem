@@ -47,7 +47,7 @@ If you are seeing errors with Mayhem writing to log files, you should also add t
 
 ```
 # Disable Mayhem log file creation
-build --repo_env=MAYHEM_LOG_NOFILE=1
+build --repo_env=MAYHEM_LOG_NOFILE
 ```
 
 This is also recommended in general to prevent unintentional cache invalidation.
