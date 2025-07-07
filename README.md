@@ -43,12 +43,14 @@ common --enable_bzlmod
 build --spawn_strategy=standalone
 ```
 
-If you are seeing errors with Mayhem and writing to log files, you should also add the following to your `.bazelrc`:
+If you are seeing errors with Mayhem writing to log files, you should also add the following to your `.bazelrc`:
 
 ```
 # Disable Mayhem log file creation
 build --repo_env=MAYHEM_LOG_NOFILE=1
 ```
+
+This is also recommended in general to prevent unintentional cache invalidation.
 
 ### Logging into Mayhem
 
