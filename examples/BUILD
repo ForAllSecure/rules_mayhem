@@ -91,6 +91,7 @@ mayhem_run(
     fail_on_defects = True,
     junit = "mayhemit_junit.xml",
     sarif = "mayhemit_sarif.json",
+    verbosity = "debug",
 )
 
 mayhem_download(

@@ -114,10 +114,11 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, 
     """
     mayhem_wait_out = ctx.actions.declare_file(ctx.label.name + ".wait.out")
 
+    wait = "wait "
     junit = "--junit " + junit if junit else ""
     sarif = "--sarif " + sarif if sarif else ""
     fod = "--fail-on-defects" if fail_on_defects else ""
-    opts = " ".join([junit, sarif, fod])
+    opts = " ".join([wait, junit, sarif, fod])
 
     if is_windows:
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.bat")
@@ -125,7 +126,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, 
         @echo off
         setlocal
         for /f "tokens=*" %%i in ({input_file}) do (
-            {mayhem_cli} wait {opts} "%%i" >> {output_file}
+            {mayhem_cli} {opts} "%%i" >> {output_file}
             {mayhem_cli} show "%%i" >> {output_file}
             {mayhem_cli} show "%%i"
         )
@@ -139,7 +140,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, 
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.sh")
         wait_wrapper_content = """
         #!/bin/bash
-        {mayhem_cli} wait {opts} $(cat {input_file}) > {output_file}
+        {mayhem_cli} {opts} $(cat {input_file}) > {output_file}
         {mayhem_cli} show $(cat {input_file}) | tee -a {output_file}
         """.format(
             mayhem_cli=mayhem_cli.path,
@@ -171,6 +172,12 @@ def _mayhem_run_impl(ctx):
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
     args_list = []
+    if ctx.attr.verbosity:
+        if ctx.attr.verbosity not in ["debug", "info"]:
+            fail("Invalid verbosity level: {}. Valid values are 'debug' or 'info'.".format(ctx.attr.verbosity))
+        else:
+            args_list.append("--verbosity")
+            args_list.append(ctx.attr.verbosity)
     args_list.append("run")
 
     if ctx.file.mayhemfile:
@@ -318,7 +325,7 @@ def _mayhem_run_impl(ctx):
         wrapper_content = """
         #!/bin/bash
         echo -n {owner} > {output_file}
-        {mayhem_cli} --verbosity debug {args} >> {output_file}
+        {mayhem_cli} {args} >> {output_file}
         """.format(
             owner=ctx.attr.owner + "/" if ctx.attr.owner else "",
             mayhem_cli=ctx.executable._mayhem_cli.path,
@@ -412,6 +419,7 @@ mayhem_run = rule(
         "junit": attr.string(mandatory = False),
         "sarif": attr.string(mandatory = False),
         "fail_on_defects": attr.bool(mandatory = False),
+        "verbosity": attr.string(mandatory = False),
         "_mayhem_cli": attr.label(
             executable = True,
             cfg = "exec",
@@ -427,6 +435,11 @@ def _mayhem_package_impl(ctx):
     package_out = ctx.actions.declare_directory(target.basename + "-pkg")
 
     args = ctx.actions.args()
+    if ctx.attr.verbosity:
+        if ctx.attr.verbosity not in ["debug", "info"]:
+            fail("Invalid verbosity level: {}. Valid values are 'debug' or 'info'.".format(ctx.attr.verbosity))
+        else:
+            args.add("--verbosity", ctx.attr.verbosity)
     args.add("package")
     args.add("-o", package_out.path)
     args.add(target.path)
@@ -450,6 +463,7 @@ mayhem_package = rule(
     implementation = _mayhem_package_impl,
     attrs = {
         "binary": attr.label(mandatory = True, allow_single_file = True),
+        "verbosity": attr.string(mandatory = False),
         "_mayhem_cli": attr.label(
             executable = True,
             cfg = "exec",
@@ -468,6 +482,11 @@ def _mayhem_download_impl(ctx):
     is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
     args = ctx.actions.args()
+    if ctx.attr.verbosity:
+        if ctx.attr.verbosity not in ["debug", "info"]:
+            fail("Invalid verbosity level: {}. Valid values are 'debug' or 'info'.".format(ctx.attr.verbosity))
+        else:
+            args.add("--verbosity", ctx.attr.verbosity)
     args.add("download")
     args.add("-o", output_dir.path)
 
@@ -498,6 +517,7 @@ mayhem_download = rule(
         "owner": attr.string(mandatory = False),
         "project": attr.string(mandatory = True),
         "target": attr.string(mandatory = True),
+        "verbosity": attr.string(mandatory = False),
         "_mayhem_cli": attr.label(
             executable = True,
             cfg = "exec",

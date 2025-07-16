@@ -43,6 +43,20 @@ common --enable_bzlmod
 build --spawn_strategy=standalone
 ```
 
+#### Windows settings
+
+If you're running Windows, you'll also need to add the following:
+
+```
+# Enable platform-specific features
+common --enable_platform_specific_config=true
+
+# Windows settings
+startup --windows_enable_symlinks
+startup --output_user_root=C:/tmp
+common:windows --enable_runfiles
+```
+
 ### Logging into Mayhem
 
 To use Mayhem, you need to generate a token for your account. You can do this by logging into the Mayhem web interface and navigating to Account Settings -> API Tokens. 
