@@ -53,7 +53,7 @@ common --enable_platform_specific_config=true
 
 # Windows settings
 startup --windows_enable_symlinks
-startup --output_user_root=C:/tmp
+startup --output_user_root=C:/tmp  # see https://bazel.build/versions/6.3.0/configure/windows#long-path-issues
 common:windows --enable_runfiles
 ```
 
