@@ -140,7 +140,7 @@
     "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
         "bzlTransitiveDigest": "944mZj58kq1CEiHX1PqbGWtt83J9nh50ua/rlmgI4pE=",
-        "usagesDigest": "ZKttRTAXvQeHIHxQrsY8nAdZUjOP2qqgZipsJGQtg0I=",
+        "usagesDigest": "tpVmvKXYzZmuHoZJTfriapU2YE3HcKuUSs6edW2bANQ=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {
