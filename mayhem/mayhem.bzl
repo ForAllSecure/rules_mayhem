@@ -96,7 +96,7 @@ mayhem_init = rule(
     },
 )
 
-def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, sarif, fail_on_defects):
+def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, owner, junit, sarif, fail_on_defects):
     """ Waits for Mayhem to finish
     
     Args:
@@ -105,6 +105,7 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, 
         mayhem_cli_exe: (Optional) The path to the Mayhem CLI with .exe extension, or None if we are on Linux
         mayhem_out: The Mayhem output file
         is_windows: A boolean indicating if the OS is Windows
+        owner: The workspace owner
         junit: The JUnit output file
         sarif: The SARIF output file
         fail_on_defects: A boolean indicating if the build should fail on defects
@@ -115,10 +116,11 @@ def mayhem_wait(ctx, mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, junit, 
     mayhem_wait_out = ctx.actions.declare_file(ctx.label.name + ".wait.out")
 
     wait = "wait "
+    owner = "--owner " + owner if owner else ""
     junit = "--junit " + junit if junit else ""
     sarif = "--sarif " + sarif if sarif else ""
     fod = "--fail-on-defects" if fail_on_defects else ""
-    opts = " ".join([wait, junit, sarif, fod])
+    opts = " ".join([wait, owner, junit, sarif, fod])
 
     if is_windows:
         wait_wrapper = ctx.actions.declare_file(ctx.label.name + "-wait.bat")
@@ -181,14 +183,16 @@ def _mayhem_run_impl(ctx):
     args_list.append("run")
 
     if ctx.file.mayhemfile:
+        mayhemfile_path = ctx.file.mayhemfile.path
         args_list.append(".")
         args_list.append("-f")
-        args_list.append(ctx.file.mayhemfile.path)
+        args_list.append(mayhemfile_path)
         inputs.append(ctx.file.mayhemfile)
     elif ctx.file.target_path:
+        mayhemfile_path = ctx.file.target_path.path + "/Mayhemfile"
         args_list.append(ctx.file.target_path.path)
         args_list.append("-f")
-        args_list.append(ctx.file.target_path.path + "/Mayhemfile")
+        args_list.append(mayhemfile_path)
         inputs.append(ctx.file.target_path)
     elif ctx.attr.image:
         args_list.append(ctx.attr.image)
@@ -311,10 +315,8 @@ def _mayhem_run_impl(ctx):
         wrapper_content = """
         @echo off
         setlocal
-        (echo|set /p={owner}) > {output_file}
-        {mayhem_cli} {args} >> {output_file}
+        {mayhem_cli} {args} > {output_file}
         """.format(
-            owner=ctx.attr.owner + "/" if ctx.attr.owner else "",
             mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
             args=" ".join(['"{}"'.format(arg) for arg in args_list]),
             output_file=mayhem_out.path.replace("/", "\\"),
@@ -324,10 +326,8 @@ def _mayhem_run_impl(ctx):
         wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
         wrapper_content = """
         #!/bin/bash
-        echo -n {owner} > {output_file}
-        {mayhem_cli} {args} >> {output_file}
+        {mayhem_cli} {args} > {output_file}
         """.format(
-            owner=ctx.attr.owner + "/" if ctx.attr.owner else "",
             mayhem_cli=ctx.executable._mayhem_cli.path,
             args=" ".join(['{}'.format(arg) for arg in args_list]),
             output_file=mayhem_out.path,
@@ -365,8 +365,8 @@ def _mayhem_run_impl(ctx):
         if not ctx.attr.duration:
             fail("The 'wait' attribute requires the 'duration' attribute to be set (otherwise, we will wait forever)")
         else:
-            mayhem_wait_out = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.junit, ctx.attr.sarif, ctx.attr.fail_on_defects)
-            return_files.append(mayhem_wait_out)    
+            mayhem_wait_out = mayhem_wait(ctx, ctx.executable._mayhem_cli, mayhem_cli_exe, mayhem_out, is_windows, ctx.attr.owner, ctx.attr.junit, ctx.attr.sarif, ctx.attr.fail_on_defects)
+            return_files.append(mayhem_wait_out)
 
     return [
         DefaultInfo(
@@ -387,6 +387,7 @@ mayhem_run = rule(
         "dynamic": attr.bool(mandatory = False),
         "coverage": attr.bool(mandatory = False),
         "image": attr.string(mandatory = False),
+        "image_dep": attr.label(mandatory = False, allow_single_file = True),
         "all": attr.bool(mandatory = False),
         "duration": attr.string(mandatory = False),
         "warning_as_error": attr.bool(mandatory = False),
