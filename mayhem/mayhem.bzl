@@ -254,7 +254,7 @@ def _mayhem_run_impl(ctx):
 
     if is_windows:
          # Need to copy the Mayhem CLI to have .exe extension
-        mayhem_cli_exe = ctx.actions.declare_file(ctx.executable._mayhem_cli.path + ".exe")
+        mayhem_cli_exe = ctx.actions.declare_file(ctx.label.name + ".exe")
 
         ctx.actions.symlink(
             output = mayhem_cli_exe,
@@ -275,7 +275,7 @@ def _mayhem_run_impl(ctx):
                 {mayhem_cli} show "%%i"
             )
             """.format(
-                mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
+                mayhem_cli=mayhem_cli_exe.short_path.replace("/", "\\"),
                 run_args=run_args_str,
                 wait_args=wait_args_str,
             )    
