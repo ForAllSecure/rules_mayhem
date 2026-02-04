@@ -275,7 +275,7 @@ def _mayhem_run_impl(ctx):
                 {mayhem_cli} show "%%i"
             )
             """.format(
-                mayhem_cli=mayhem_cli_exe.short_path.replace("/", "\\"),
+                mayhem_cli=mayhem_cli_exe.path.replace("/", "\\"),
                 run_args=run_args_str,
                 wait_args=wait_args_str,
             )    
