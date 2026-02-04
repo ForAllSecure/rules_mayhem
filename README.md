@@ -8,7 +8,7 @@ You can add the following snippet:
 
 ```
 ## MODULE.bazel
-bazel_dep(name = "rules_mayhem", version = "0.8.3")
+bazel_dep(name = "rules_mayhem", version = "0.8.4")
 
 rules_mayhem_extension = use_extension("@rules_mayhem//mayhem:extensions.bzl", "rules_mayhem_extension")
 use_repo(rules_mayhem_extension, "bazel_skylib", "mayhem_cli_linux", "mayhem_cli_windows", "platforms", "yq_cli_linux", "yq_cli_windows")
@@ -88,21 +88,21 @@ set MAYHEM_URL=https://<your_mayhem_instance>
 set XDG_CONFIG_HOME=%USERPROFILE%\.config
 ```
 
-3. Run `bazel build` with the `--action_env` flags to specify the Mayhem URL and configuration file location:
+3. Run `bazel run` with the `--action_env` flags to specify the Mayhem URL and configuration file location:
 
 ```bash
-bazel build --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:run_mayhemit
+bazel run --action_env=MAYHEM_URL --action_env=XDG_CONFIG_HOME //examples:run_mayhemit
 ```
 
-Instead of adding these flags to every `bazel build` command, you can also add them to your `.bazelrc` file:
+Instead of adding these flags to every `bazel run` command, you can also add them to your `.bazelrc` file:
 
 ```
 # .bazelrc
-build --action_env=MAYHEM_URL
-build --action_env=XDG_CONFIG_HOME
+common --action_env=MAYHEM_URL
+common --action_env=XDG_CONFIG_HOME
 ```
 
-The remainder of this document assumes that you have set up your Mayhem configuration in your `.bazelrc`, and omits the `--action_env` flags from the `bazel build` commands for brevity.
+The remainder of this document assumes that you have set up your Mayhem configuration in your `.bazelrc`, and omits the `--action_env` flags from the `bazel` commands for brevity.
 
 ## To build a Mayhemfile
 
@@ -194,10 +194,10 @@ mayhem_run(
 )
 ```
 
-Then build:
+Then run:
 
 ```
-bazel build //examples:run_factor
+bazel run //examples:run_factor
 INFO: Analyzed target //examples:run_factor (0 packages loaded, 0 targets configured).
 INFO: From Starting Mayhem run from 'examples':
 git version 2.46.0 found
@@ -264,7 +264,7 @@ INFO: 2 processes: 1 internal, 1 local.
 INFO: Build completed successfully, 2 total actions
 
 
-bazel build //examples:run_mayhemit
+bazel run //examples:run_mayhemit
 INFO: Analyzed target //examples:run_mayhemit (0 packages loaded, 1 target configured).
 INFO: From Starting Mayhem run from 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg':
 git version 2.46.0 found
@@ -310,7 +310,7 @@ mayhem_run(
 Then build and run:
 
 ```
-bazel build //examples:run_mayhemit
+bazel run //examples:run_mayhemit
 INFO: Analyzed target //examples:run_mayhemit (56 packages loaded, 239 targets configured).
 INFO: From Packaging target examples/mayhemit to 'bazel-out/k8-fastbuild/bin/examples/mayhemit-pkg'...:
 Packaging target: examples/mayhemit
@@ -402,9 +402,10 @@ INFO: Build completed successfully, 2 total actions
 - [x] `wait` parameter to `mayhem_run()`: Support waiting for Mayhem run to complete
 - [x] `fail_on_defects` parameter to `mayhem_run()`: Return exit code 1 if Mayhem run finds defects
 - [x] `mayhem_download` rule to grab testsuite and coverage info
-- [x] Remove support for using `--action_env` to set Mayhem secrets (this is leaky); use a `mayhem_secrets.bzl` file instead 
+- [x] Remove support for using `--action_env` to set Mayhem secrets (this is leaky); use `XDG_CONFIG_HOME` instead
 - [ ] Support MacOS (currently only Linux and Windows; MacOS requires binary signing and unpackaging)
-- [ ] Run the `mayhem_run` targets with `bazel run` instead of `bazel build`
+- [X] Run the `mayhem_run` targets with `bazel run` instead of `bazel build`
+- [X] Support image data dependencies from `rules_oci` in `mayhem_run`
 - [ ] Use output flag for `mayhem run` instead of custom wrapper script
 - [ ] Tests are currently `sh_test` only and do not run on Windows
 

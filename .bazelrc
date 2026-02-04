@@ -5,5 +5,5 @@ common --enable_bzlmod
 build --spawn_strategy=standalone
 
 # Set action envs for Mayhem
-build --action_env=MAYHEM_URL
-build --action_env=XDG_CONFIG_HOME
+common --action_env=MAYHEM_URL
+common --action_env=XDG_CONFIG_HOME
