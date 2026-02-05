@@ -253,26 +253,16 @@ def _mayhem_run_impl(ctx):
         wait_args_str = " ".join(['"{}"'.format(arg) for arg in wait_args])
 
     if is_windows:
-         # Need to copy the Mayhem CLI to have .exe extension
-        mayhem_cli_exe = ctx.actions.declare_file(ctx.label.name + "_cli_symlink.exe")
+        # Need to copy the Mayhem CLI to have .exe extension
+        mayhem_cli_exe_path = ctx.executable._mayhem_cli.short_path.replace("/", "\\") + ".exe"
 
-        ctx.actions.symlink(
-            output = mayhem_cli_exe,
-            target_file = ctx.executable._mayhem_cli,
-            is_executable = True,
+        runfiles = runfiles.merge(
+            ctx.runfiles(
+                symlinks = {mayhem_cli_exe_path: ctx.executable._mayhem_cli}
+            )
         )
 
-        runfiles = runfiles.merge(ctx.runfiles(files=[mayhem_cli_exe]))
-
-        print("mayhem cli exe short path: {}".format(mayhem_cli_exe.short_path))
-        print("mayhem cli exe path: {}".format(ctx.executable._mayhem_cli.path))
-        print("mayhem cli short path: {}".format(ctx.executable._mayhem_cli.short_path))
-        print("mayhem cli path: {}".format(ctx.executable._mayhem_cli.path))
-
         wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
-
-        print("wrapper path: {}".format(wrapper.path))
-        print("wrapper short path: {}".format(wrapper.short_path))
         
         if wait_args_str:
             wrapper_content = """
@@ -283,7 +273,7 @@ def _mayhem_run_impl(ctx):
                 {mayhem_cli} show "%%i"
             )
             """.format(
-                mayhem_cli=mayhem_cli_exe.short_path.replace("/", "\\"),
+                mayhem_cli=mayhem_cli_exe_path,
                 run_args=run_args_str,
                 wait_args=wait_args_str,
             )    
@@ -293,7 +283,7 @@ def _mayhem_run_impl(ctx):
             setlocal
             {mayhem_cli} {run_args}
             """.format(
-                mayhem_cli=mayhem_cli_exe.short_path.replace("/", "\\"),
+                mayhem_cli=mayhem_cli_exe_path,
                 run_args=run_args_str,
             )
     else:
