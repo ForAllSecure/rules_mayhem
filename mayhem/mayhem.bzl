@@ -287,7 +287,6 @@ def _mayhem_run_impl(ctx):
                 run_args=run_args_str,
             )
     else:
-        mayhem_cli_exe = None
         wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
         if wait_args_str:
             wrapper_content = """
