@@ -3,6 +3,7 @@ common --enable_bzlmod
 
 # Spawn strategy - if this is not set, bazel tries to reference files that don't exist
 build --spawn_strategy=standalone
+build --enable_runfiles
 
 # Set action envs for Mayhem
 common --action_env=MAYHEM_URL

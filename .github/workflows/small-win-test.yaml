@@ -61,7 +61,7 @@ jobs:
 
       - name: Run bazel build
         run: |
-          bazel run //examples:run_mayhemit --subcommands=pretty_print --verbose_failures
+          bazel run //examples:run_mayhemit
         shell: cmd
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
