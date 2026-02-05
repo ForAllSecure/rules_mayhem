@@ -88,11 +88,11 @@ mayhem_run(
     target = "mayhemit",
     all = True,
     target_path = ":package_mayhemit",
-    wait = True,
+    wait = False,
     duration = "30",
     fail_on_defects = True,
-    junit = "bazel-out/k8-fastbuild/bin/examples/mayhemit_junit.xml",
-    sarif = "bazel-out/k8-fastbuild/bin/examples/mayhemit_sarif.json",
+    junit = "mayhemit_junit.xml",
+    sarif = "mayhemit_sarif.json",
     verbosity = "debug",
 )
 

@@ -254,7 +254,7 @@ def _mayhem_run_impl(ctx):
 
     if is_windows:
          # Need to copy the Mayhem CLI to have .exe extension
-        mayhem_cli_exe = ctx.actions.declare_file(ctx.label.name + ".exe")
+        mayhem_cli_exe = ctx.actions.declare_file(ctx.executable._mayhem_cli.path + ".exe")
 
         ctx.actions.symlink(
             output = mayhem_cli_exe,
@@ -281,8 +281,24 @@ def _mayhem_run_impl(ctx):
             )    
         else:
             wrapper_content = """
-            @echo off
-            setlocal
+            echo [DEBUG] Script directory: %~dp0
+            echo [DEBUG] mayhem_cli path: {mayhem_cli}
+            echo [DEBUG] Checking if file exists...
+            if exist "{mayhem_cli}" (
+                echo [DEBUG] File exists
+                dir "{mayhem_cli}"
+            ) else (
+                echo [DEBUG] File NOT found
+                echo [DEBUG] Listing current directory:
+                dir
+                echo [DEBUG] Listing parent directory:
+                dir ..
+            )
+
+            REM Try to follow symlink
+            fsutil reparsepoint query "{mayhem_cli}" 2>nul
+
+            echo [DEBUG] Running command: {mayhem_cli} {run_args}
             {mayhem_cli} {run_args}
             """.format(
                 mayhem_cli=mayhem_cli_exe.short_path.replace("/", "\\"),
@@ -319,7 +335,6 @@ def _mayhem_run_impl(ctx):
 
     return [
         DefaultInfo(
-            # files = depset(return_files),
             executable = wrapper,
             runfiles = runfiles,
         ),
