@@ -264,7 +264,15 @@ def _mayhem_run_impl(ctx):
 
         runfiles = runfiles.merge(ctx.runfiles(files=[mayhem_cli_exe]))
 
+        print("mayhem cli exe short path: {}".format(mayhem_cli_exe.short_path))
+        print("mayhem cli exe path: {}".format(ctx.executable._mayhem_cli.path))
+        print("mayhem cli short path: {}".format(ctx.executable._mayhem_cli.short_path))
+        print("mayhem cli path: {}".format(ctx.executable._mayhem_cli.path))
+
         wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
+
+        print("wrapper path: {}".format(wrapper.path))
+        print("wrapper short path: {}".format(wrapper.short_path))
         
         if wait_args_str:
             wrapper_content = """
@@ -281,24 +289,8 @@ def _mayhem_run_impl(ctx):
             )    
         else:
             wrapper_content = """
-            echo [DEBUG] Script directory: %~dp0
-            echo [DEBUG] mayhem_cli path: {mayhem_cli}
-            echo [DEBUG] Checking if file exists...
-            if exist "{mayhem_cli}" (
-                echo [DEBUG] File exists
-                dir "{mayhem_cli}"
-            ) else (
-                echo [DEBUG] File NOT found
-                echo [DEBUG] Listing current directory:
-                dir
-                echo [DEBUG] Listing parent directory:
-                dir ..
-            )
-
-            REM Try to follow symlink
-            fsutil reparsepoint query "{mayhem_cli}" 2>nul
-
-            echo [DEBUG] Running command: {mayhem_cli} {run_args}
+            @echo off
+            setlocal
             {mayhem_cli} {run_args}
             """.format(
                 mayhem_cli=mayhem_cli_exe.short_path.replace("/", "\\"),
