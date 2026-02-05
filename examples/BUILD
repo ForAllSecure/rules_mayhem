@@ -1,4 +1,6 @@
 load("@rules_mayhem//mayhem:mayhem.bzl", "mayhem_init", "mayhem_run", "mayhem_package", "mayhem_download")
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
 # Generates a minimal Mayhemfile
 mayhem_init(

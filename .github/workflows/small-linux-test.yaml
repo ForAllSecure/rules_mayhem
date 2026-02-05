@@ -60,7 +60,7 @@ jobs:
 
       - name: Run bazel build
         run: |
-          bazel build //examples:run_mayhemit
+          bazel run //examples:run_mayhemit
         shell: bash
         env:
           MAYHEM_URL: ${{ env.MAYHEM_URL }}
