@@ -1,6 +1,6 @@
 matrix:
   platform: ["debian10", "ubuntu2004"]
-  bazel: [7.x]
+  bazel: [7.x, 8.x, 9.x]
 tasks:
   run_tests:
     name: "Run test module"
