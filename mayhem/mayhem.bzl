@@ -229,14 +229,11 @@ def _mayhem_run_impl(ctx):
     if ctx.attr.insecure:
         run_args.append("--insecure")
 
-    run_args_str = " ".join(['"{}"'.format(arg) for arg in run_args])
-    wait_args_str = ""
-
     # For mayhem wait
+    wait_args = []
     if ctx.attr.wait:
         if not ctx.attr.duration:
             fail("The 'wait' attribute requires the 'duration' attribute to be set (otherwise, we will wait forever)")
-        wait_args = []
         wait_args.append("wait")
         if ctx.attr.owner:
             wait_args.append("--owner")
@@ -250,69 +247,73 @@ def _mayhem_run_impl(ctx):
         if ctx.attr.fail_on_defects:
             wait_args.append("--fail-on-defects")
 
-        wait_args_str = " ".join(['"{}"'.format(arg) for arg in wait_args])
+    py_content = """#!/usr/bin/env python3
+import subprocess
+import sys
+
+mayhem_cli = "{mayhem_cli}"
+run_args = {run_args}
+wait_args = {wait_args}
+
+# Mayhem run
+run_result = subprocess.run([mayhem_cli] + run_args, capture_output=True, text=True)
+print("Run created: " + str(run_result.stdout))
+run_id = run_result.stdout.strip()
+if run_result.returncode != 0:
+    print(run_result.stderr, file=sys.stderr)
+    sys.exit(run_result.returncode)
+
+if not run_id:
+    print("Failed to get run ID from Mayhem output", file=sys.stderr)
+    sys.exit(1)
+
+if wait_args:
+    # Mayhem wait
+    wait_result = subprocess.run([mayhem_cli] + wait_args + [run_id], capture_output=True, text=True)
+    print(wait_result.stdout)
+    if wait_result.returncode != 0:
+        print(wait_result.stderr, file=sys.stderr)
+        sys.exit(wait_result.returncode)
+
+    # Mayhem show
+    show_result = subprocess.run([mayhem_cli, "show", run_id], capture_output=True, text=True)
+    print(show_result.stdout)
+    if show_result.returncode != 0:
+        print(show_result.stderr, file=sys.stderr)
+        sys.exit(show_result.returncode)
+""".format(
+        mayhem_cli=ctx.executable._mayhem_cli.short_path,
+        run_args=run_args,
+        wait_args=wait_args,
+    )
 
     if is_windows:
-        # Need to copy the Mayhem CLI to have .exe extension
-        mayhem_cli_exe_path = ctx.executable._mayhem_cli.short_path.replace("/", "\\") + ".exe"
-
+        py_script = ctx.actions.declare_file(ctx.label.name + ".py")
+        ctx.actions.write(output=py_script, content=py_content)
         runfiles = runfiles.merge(
-            ctx.runfiles(
-                symlinks = {mayhem_cli_exe_path: ctx.executable._mayhem_cli}
-            )
+            ctx.runfiles(files=[py_script])
+        )
+
+        bat_content = """
+        @echo off
+        python "%~dp0{py_script}"
+        """.format(
+            py_script=py_script.basename
         )
 
         wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
-        
-        if wait_args_str:
-            wrapper_content = """
-            @echo off
-            setlocal
-            for /f "tokens=*" %%i in ('{mayhem_cli} {run_args}') do (
-                {mayhem_cli} {wait_args} "%%i"
-                {mayhem_cli} show "%%i"
-            )
-            """.format(
-                mayhem_cli=mayhem_cli_exe_path,
-                run_args=run_args_str,
-                wait_args=wait_args_str,
-            )    
-        else:
-            wrapper_content = """
-            @echo off
-            setlocal
-            {mayhem_cli} {run_args}
-            """.format(
-                mayhem_cli=mayhem_cli_exe_path,
-                run_args=run_args_str,
-            )
+        ctx.actions.write(
+            output=wrapper,
+            content=bat_content,
+            is_executable=True,
+        )
     else:
-        wrapper = ctx.actions.declare_file(ctx.label.name + ".sh")
-        if wait_args_str:
-            wrapper_content = """
-            #!/bin/bash
-            run_id=$({mayhem_cli} {run_args})
-            {mayhem_cli} {wait_args} $run_id
-            {mayhem_cli} show $run_id
-            """.format(
-                mayhem_cli=ctx.executable._mayhem_cli.short_path,
-                run_args=run_args_str,
-                wait_args=wait_args_str,
-            )
-        else:
-            wrapper_content = """
-            #!/bin/bash
-            {mayhem_cli} {run_args}
-            """.format(
-                mayhem_cli=ctx.executable._mayhem_cli.short_path,
-                run_args=run_args_str,
-            )
-
-    ctx.actions.write(
-        output=wrapper,
-        content=wrapper_content,
-        is_executable=True
-    )
+        wrapper = ctx.actions.declare_file(ctx.label.name + ".py")
+        ctx.actions.write(
+            output=wrapper, 
+            content=py_content, 
+            is_executable=True
+        )
 
     return [
         DefaultInfo(
@@ -374,7 +375,7 @@ mayhem_run = rule(
             default = Label("@rules_mayhem//mayhem:mayhem_cli"),
             allow_single_file = True,
         ),
-        '_windows_constraint': attr.label(default = '@platforms//os:windows'),
+        "_windows_constraint": attr.label(default = "@platforms//os:windows"),
     },
     executable = True,
 )
@@ -472,6 +473,5 @@ mayhem_download = rule(
             default = Label("@rules_mayhem//mayhem:mayhem_cli"),
             allow_single_file = True,
         ),
-        '_windows_constraint': attr.label(default = '@platforms//os:windows'),
     },
 )
