@@ -99,6 +99,7 @@ mayhem_init = rule(
 def _mayhem_run_impl(ctx):
     runfiles = ctx.runfiles(files=[ctx.executable._mayhem_cli])
     runfiles = runfiles.merge(ctx.attr._mayhem_cli[DefaultInfo].default_runfiles)
+    is_windows = ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
     run_args = []
     if ctx.attr.verbosity:
@@ -246,8 +247,7 @@ def _mayhem_run_impl(ctx):
         if ctx.attr.fail_on_defects:
             wait_args.append("--fail-on-defects")
 
-    wrapper = ctx.actions.declare_file(ctx.label.name + ".py")
-    wrapper_content = """#!/usr/bin/env python3
+    py_content = """#!/usr/bin/env python3
 import subprocess
 import sys
 
@@ -282,16 +282,38 @@ if wait_args:
         print(show_result.stderr, file=sys.stderr)
         sys.exit(show_result.returncode)
 """.format(
-            mayhem_cli=ctx.executable._mayhem_cli.short_path,
-            run_args=run_args,
-            wait_args=wait_args,
+        mayhem_cli=ctx.executable._mayhem_cli.short_path,
+        run_args=run_args,
+        wait_args=wait_args,
+    )
+
+    if is_windows:
+        py_script = ctx.actions.declare_file(ctx.label.name + ".py")
+        ctx.actions.write(output=py_script, content=py_content)
+        runfiles = runfiles.merge(
+            ctx.runfiles(files=[py_script])
         )
 
-    ctx.actions.write(
-        output=wrapper,
-        content=wrapper_content,
-        is_executable=True
-    )
+        bat_content = """
+        @echo off
+        python "%~dp0{py_script}"
+        """.format(
+            py_script=py_script.basename
+        )
+
+        wrapper = ctx.actions.declare_file(ctx.label.name + ".bat")
+        ctx.actions.write(
+            output=wrapper,
+            content=bat_content,
+            is_executable=True,
+        )
+    else:
+        wrapper = ctx.actions.declare_file(ctx.label.name + ".py")
+        ctx.actions.write(
+            output=wrapper, 
+            content=py_content, 
+            is_executable=True
+        )
 
     return [
         DefaultInfo(
@@ -353,6 +375,7 @@ mayhem_run = rule(
             default = Label("@rules_mayhem//mayhem:mayhem_cli"),
             allow_single_file = True,
         ),
+        "_windows_constraint": attr.label(default = "@platforms//os:windows"),
     },
     executable = True,
 )
