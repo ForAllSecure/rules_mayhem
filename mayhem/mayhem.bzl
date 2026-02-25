@@ -257,7 +257,7 @@ wait_args = {wait_args}
 
 # Mayhem run
 run_result = subprocess.run([mayhem_cli] + run_args, capture_output=True, text=True)
-print(f"Run created: {run_result.stdout}")
+print("Run created: " + str(run_result.stdout))
 run_id = run_result.stdout.strip()
 if run_result.returncode != 0:
     print(run_result.stderr, file=sys.stderr)
