@@ -11,7 +11,7 @@ on:
   
 jobs:
   publish:
-    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@main
     with:
       tag_name: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag_name }}
       # GitHub repository which is a fork of the upstream where the Pull Request will be opened.
