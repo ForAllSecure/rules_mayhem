@@ -250,8 +250,26 @@ def _mayhem_run_impl(ctx):
     py_content = """#!/usr/bin/env python3
 import subprocess
 import sys
+import os
 
-mayhem_cli = "{mayhem_cli}"
+def resolve_runfile_mayhem_cli_path(mayhem_cli_short_path):
+    # Bazel sets the RUNFILES_MANIFEST_FILE environment variable on Windows
+    # which we can use to resolve the path to the mayhem CLI in the case that
+    # runfiles/symlinks are not available
+
+    manifest_path = os.environ.get("RUNFILES_MANIFEST_FILE")
+    if manifest_path and os.name == "nt":
+        with open(manifest_path, "r") as manifest_file:
+            for line in manifest_file:
+                key, value = line.strip().split(" ", 1)
+                if "mayhem" in key.lower() and "cli" in key.lower():
+                    return value
+    
+    # If the manifest file is not set or the mayhem CLI is not found in the manifest,
+    # fall back to the original path
+    return mayhem_cli_short_path
+
+mayhem_cli = resolve_runfile_mayhem_cli_path("{mayhem_cli}")
 run_args = {run_args}
 wait_args = {wait_args}
 
