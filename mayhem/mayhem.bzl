@@ -110,6 +110,8 @@ def _mayhem_run_impl(ctx):
             run_args.append(ctx.attr.verbosity)
     run_args.append("run")
 
+    package_basename = ""
+    target_path = ""
     if ctx.file.mayhemfile:
         mayhemfile_path = ctx.file.mayhemfile.short_path
         run_args.append(".")
@@ -117,10 +119,8 @@ def _mayhem_run_impl(ctx):
         run_args.append(mayhemfile_path)
         runfiles = runfiles.merge(ctx.runfiles(files=[ctx.file.mayhemfile]))
     elif ctx.file.target_path:
-        mayhemfile_path = ctx.file.target_path.short_path + "/Mayhemfile"
-        run_args.append(ctx.file.target_path.short_path)
-        run_args.append("-f")
-        run_args.append(mayhemfile_path)
+        package_basename = ctx.file.target_path.basename
+        target_path = str(ctx.file.target_path.short_path)
         runfiles = runfiles.merge(ctx.runfiles(files=[ctx.file.target_path]))
     elif ctx.attr.image:
         run_args.append(ctx.attr.image)
@@ -252,26 +252,46 @@ import subprocess
 import sys
 import os
 
-def resolve_runfile_mayhem_cli_path(mayhem_cli_short_path):
-    # Bazel sets the RUNFILES_MANIFEST_FILE environment variable on Windows
-    # which we can use to resolve the path to the mayhem CLI in the case that
-    # runfiles/symlinks are not available
+runfiles_enabled = os.path.exists("{mayhem_cli}")
 
-    manifest_path = os.environ.get("RUNFILES_MANIFEST_FILE")
-    if manifest_path and os.name == "nt":
+def resolve_runfile_mayhem_cli_path(mayhem_cli_short_path):
+
+    if runfiles_enabled:
+        # Runfiles are enabled, so no need to resolve the path manually
+        return mayhem_cli_short_path
+
+    manifest_path = None
+    work_dir = os.path.dirname(os.path.abspath(__file__))
+    print("Looking for manifest file in runfiles directory: " + work_dir)
+    for file in os.listdir(work_dir):
+        if file.endswith(".runfiles_manifest"):
+            manifest_path = os.path.join(work_dir, file)
+            print("Found manifest file: " + manifest_path)
+            break
+
+    if manifest_path:
         with open(manifest_path, "r") as manifest_file:
             for line in manifest_file:
                 key, value = line.strip().split(" ", 1)
                 if "mayhem" in key.lower() and "cli" in key.lower():
                     return value
-    
-    # If the manifest file is not set or the mayhem CLI is not found in the manifest,
-    # fall back to the original path
-    return mayhem_cli_short_path
+
+    raise FileNotFoundError("Could not find mayhem CLI in runfiles manifest")
 
 mayhem_cli = resolve_runfile_mayhem_cli_path("{mayhem_cli}")
 run_args = {run_args}
 wait_args = {wait_args}
+
+if "{package_basename}":
+    if runfiles_enabled:
+        package_dir = "{target_path}"
+    else:
+        package_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "{package_basename}")
+
+    package_index = run_args.index("run")
+    run_args.insert(package_index + 1, package_dir)
+    run_args.insert(package_index + 2, "-f")
+    run_args.insert(package_index + 3, os.path.join(package_dir, "Mayhemfile"))
 
 # Mayhem run
 run_result = subprocess.run([mayhem_cli] + run_args, capture_output=True, text=True)
@@ -301,6 +321,9 @@ if wait_args:
         sys.exit(show_result.returncode)
 """.format(
         mayhem_cli=ctx.executable._mayhem_cli.short_path,
+        target_name=ctx.label.name,
+        target_path=target_path,
+        package_basename=package_basename,
         run_args=run_args,
         wait_args=wait_args,
     )

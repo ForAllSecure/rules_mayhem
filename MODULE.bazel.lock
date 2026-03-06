@@ -192,7 +192,7 @@
     "//mayhem:extensions.bzl%rules_mayhem_extension": {
       "general": {
         "bzlTransitiveDigest": "SUFcWZq0Nc0sjSX728mHdDz01rb3+thUWiQBxjMbYsA=",
-        "usagesDigest": "rrpQRkerDYioRqTE9+dhc3hb9COdGQVTTq1fgQ07pZk=",
+        "usagesDigest": "Oe8goIySCz0esqxbJE2IWDiez9LcX7Lz3532P77zhgE=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools",
           "REPO_MAPPING:,rules_mayhem ",
