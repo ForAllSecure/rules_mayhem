@@ -289,10 +289,10 @@ if "{package_basename}":
     else:
         package_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "{package_basename}")
 
-    run_index = run_args.index("run")
-    run_args.insert(run_index + 1, package_dir)
-    run_args.insert(run_index + 2, "-f")
-    run_args.insert(run_index + 3, os.path.join(package_dir, "Mayhemfile"))
+    package_index = run_args.index("run")
+    run_args.insert(package_index + 1, package_dir)
+    run_args.insert(package_index + 2, "-f")
+    run_args.insert(package_index + 3, os.path.join(package_dir, "Mayhemfile"))
 
 # Mayhem run
 run_result = subprocess.run([mayhem_cli] + run_args, capture_output=True, text=True)
