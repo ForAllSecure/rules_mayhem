@@ -281,6 +281,7 @@ def resolve_runfile_mayhem_cli_path(mayhem_cli_short_path):
 mayhem_cli = resolve_runfile_mayhem_cli_path("{mayhem_cli}")
 run_args = {run_args}
 wait_args = {wait_args}
+show_args = ["show" if arg == "wait" else arg for arg in wait_args]
 
 if "{package_basename}":
     if runfiles_enabled:
@@ -288,10 +289,10 @@ if "{package_basename}":
     else:
         package_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "{package_basename}")
 
-    package_index = run_args.index("run")
-    run_args.insert(package_index + 1, package_dir)
-    run_args.insert(package_index + 2, "-f")
-    run_args.insert(package_index + 3, os.path.join(package_dir, "Mayhemfile"))
+    run_index = run_args.index("run")
+    run_args.insert(run_index + 1, package_dir)
+    run_args.insert(run_index + 2, "-f")
+    run_args.insert(run_index + 3, os.path.join(package_dir, "Mayhemfile"))
 
 # Mayhem run
 run_result = subprocess.run([mayhem_cli] + run_args, capture_output=True, text=True)
@@ -314,7 +315,7 @@ if wait_args:
         sys.exit(wait_result.returncode)
 
     # Mayhem show
-    show_result = subprocess.run([mayhem_cli, "show", run_id], capture_output=True, text=True)
+    show_result = subprocess.run([mayhem_cli] + show_args + [run_id], capture_output=True, text=True)
     print(show_result.stdout)
     if show_result.returncode != 0:
         print(show_result.stderr, file=sys.stderr)
