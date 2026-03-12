@@ -231,13 +231,17 @@ def _mayhem_run_impl(ctx):
 
     # For mayhem wait
     wait_args = []
+    show_args = []
     if ctx.attr.wait:
         if not ctx.attr.duration:
             fail("The 'wait' attribute requires the 'duration' attribute to be set (otherwise, we will wait forever)")
         wait_args.append("wait")
+        show_args.append("show")
         if ctx.attr.owner:
             wait_args.append("--owner")
             wait_args.append(ctx.attr.owner)
+            show_args.append("--owner")
+            show_args.append(ctx.attr.owner)
         if ctx.attr.junit:
             wait_args.append("--junit")
             wait_args.append(ctx.attr.junit)
@@ -281,7 +285,7 @@ def resolve_runfile_mayhem_cli_path(mayhem_cli_short_path):
 mayhem_cli = resolve_runfile_mayhem_cli_path("{mayhem_cli}")
 run_args = {run_args}
 wait_args = {wait_args}
-show_args = ["show" if arg == "wait" else arg for arg in wait_args]
+show_args = {show_args}
 
 if "{package_basename}":
     if runfiles_enabled:
@@ -327,6 +331,7 @@ if wait_args:
         package_basename=package_basename,
         run_args=run_args,
         wait_args=wait_args,
+        show_args=show_args,
     )
 
     if is_windows:
