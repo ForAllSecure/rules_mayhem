@@ -8,7 +8,7 @@ You can add the following snippet:
 
 ```
 ## MODULE.bazel
-bazel_dep(name = "rules_mayhem", version = "0.8.8")
+bazel_dep(name = "rules_mayhem", version = "0.8.9")
 
 rules_mayhem_extension = use_extension("@rules_mayhem//mayhem:extensions.bzl", "rules_mayhem_extension")
 use_repo(rules_mayhem_extension, "bazel_skylib", "mayhem_cli_linux", "mayhem_cli_windows", "platforms", "yq_cli_linux", "yq_cli_windows")
@@ -21,8 +21,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_mayhem",
     strip_prefix = "rules_mayhem",
-    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.8.8/rules_mayhem-0.8.8.tar.gz"],
-    sha256 = "60671711d960fe5451cf73283f466f1df06e12267b4463b2286f5999be633e7d",
+    urls = ["https://github.com/ForAllSecure/rules_mayhem/releases/download/0.8.9/rules_mayhem-0.8.9.tar.gz"],
+    sha256 = "7f535cfc9245f9002f02f8e534a1ab0c975156128b10acd81bc6f071db8e24de",
 )
 
 load("@rules_mayhem//mayhem:repositories.bzl", "rules_mayhem_repositories")
